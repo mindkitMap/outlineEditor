@@ -1,9 +1,8 @@
 import React from "react";
-import "./spreadsheet.css";
 import ReactDOM from "react-dom";
-import { EditableGrid } from "./EditableGrid";
+import "react-sortable-tree/style.css";
 
-export const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+import { EditableTree } from "./EditableTree";
 
 const rootElement = document.getElementById("root");
-ReactDOM.render(<EditableGrid />, rootElement);
+ReactDOM.render(<EditableTree />, rootElement);
