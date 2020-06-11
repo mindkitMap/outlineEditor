@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "react-sortable-tree/style.css";
+import "./spreadsheet.css";
 
 import { EditableTree } from "./EditableTree";
 

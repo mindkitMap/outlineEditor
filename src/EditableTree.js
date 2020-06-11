@@ -49,16 +49,17 @@ export class EditableTree extends Component {
   keyInNodeEditing(event, node, path) {
     console.log("keyInNodeEditing");
     console.log(node.id);
+    console.log(this[`ref-en-${node.id}`]);
     if (event.keyCode === 27) {
       // console.log(this.treeRef.current);
       // this.treeRef.current.focus();
       event.target.blur();
-      console.log(document.activeElement);
       this.treeRef.current.tabIndex = -1;
       this.treeRef.current.focus();
-      console.log(document.activeElement);
     }
   }
+
+  findNext(rowInfo) {}
 
   handleGeneralKeyDown(event) {
     console.log("handleGeneralKeyDown");
@@ -78,7 +79,7 @@ export class EditableTree extends Component {
             onChange={(treeData) => this.setState({ ...this.state, treeData })}
             generateNodeProps={(rowInfo) => {
               const { node, path } = rowInfo;
-              return {
+              let nodeProps = {
                 onClick: (event) => this.nodeClicked(event, rowInfo),
                 onFocus: (event) => console.log("on focus"),
                 title: (
@@ -87,6 +88,7 @@ export class EditableTree extends Component {
                     onKeyDown={(event) =>
                       this.keyInNodeEditing(event, node, path)
                     }
+                    innerRef={(en) => (this[`ref-en-${node.id}`] = en)}
                     onBlur={(event) => {
                       console.log("on blur");
                       console.log(event.target);
@@ -98,6 +100,10 @@ export class EditableTree extends Component {
                   />
                 ),
               };
+              if (this.state.selectedNodeId === rowInfo.node.id) {
+                nodeProps.className = "selected-node";
+              }
+              return nodeProps;
             }}
           />
         </div>
