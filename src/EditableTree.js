@@ -1,5 +1,9 @@
 import React, { Component } from "react";
-import SortableTree, { changeNodeAtPath } from "react-sortable-tree";
+import SortableTree, {
+  changeNodeAtPath,
+  getVisibleNodeInfoAtIndex,
+  find,
+} from "react-sortable-tree";
 import { EditableNode } from "./EditableNode";
 import { data } from "./data";
 // In your own app, you would need to use import styles once in the app
@@ -15,26 +19,29 @@ export class EditableTree extends Component {
 
     this.treeRef = React.createRef();
   }
-  nodeClicked(event, rowInfo) {
+  selectNode(rowInfo) {
+    this.setState({ ...this.state, selectedNodeId: rowInfo.node.id });
+  }
+  focusNode(){
+    const ref = this[`ref-en-${this.state.selectedNodeId}`];
+    if(ref){
+      ref.focus()
+    }
+  }
+  handleNodeClicked(event, rowInfo) {
     if (
       event.target.className.includes("collapseButton") ||
       event.target.className.includes("expandButton")
     ) {
-      // ignore the event
     } else {
-      console.log(event);
-      console.log("clicked");
-      console.log(rowInfo.node.id);
-      console.log(event.target);
-      event.target.focus();
-      this.setState({ ...this.state, selectedNodeId: rowInfo.node.id });
+      this.selectNode(rowInfo);
     }
   }
 
   getNodeKey({ node }) {
     return node.id;
   }
-  nodeTitleChanged(event, node, path) {
+  handleNodeTitleChanged(event, node, path) {
     const newNode = { ...node, name: event.target.value };
     this.setState({
       ...this.state,
@@ -46,10 +53,10 @@ export class EditableTree extends Component {
       }),
     });
   }
-  keyInNodeEditing(event, node, path) {
-    console.log("keyInNodeEditing");
-    console.log(node.id);
-    console.log(this[`ref-en-${node.id}`]);
+  handleKeyInNodeEditing(event, node, path) {
+    // console.log("keyInNodeEditing");
+    // console.log(node.id);
+    // console.log(this[`ref-en-${node.id}`]);
     if (event.keyCode === 27) {
       // console.log(this.treeRef.current);
       // this.treeRef.current.focus();
@@ -58,12 +65,49 @@ export class EditableTree extends Component {
       this.treeRef.current.focus();
     }
   }
+  //return rowInfo
+  findNextRowInfo(rowInfo, delta = 1) {
+    const { treeIndex } = rowInfo;
+    const next = getVisibleNodeInfoAtIndex({
+      treeData: this.state.treeData,
+      index: treeIndex + delta,
+      getNodeKey: this.getNodeKey,
+    });
+    console.log(next);
+    return next;
+  }
 
-  findNext(rowInfo) {}
-
+  findById(nodeId) {
+    const re = find({
+      treeData: this.state.treeData,
+      searchMethod: (node) => node.id === nodeId,
+      getNodeKey: this.getNodeKey,
+    });
+    console.log(re);
+    return re?.matches?.[0]?.node;
+  }
+  gotoSelectDelta(delta = 1) {
+    if (this.rowInfo) {
+      const newInfo = this.findNextRowInfo(this.rowInfo, delta);
+      //不要去隐藏 root 了。
+      if (newInfo && newInfo.path.length > 0) {
+        this.selectNode(newInfo);
+      }
+    }
+  }
   handleGeneralKeyDown(event) {
-    console.log("handleGeneralKeyDown");
-    console.log(event);
+    // console.log("handleGeneralKeyDown");
+    // console.log(event);
+    if (event.keyCode === 40) {
+      this.gotoSelectDelta();
+    }
+    if (event.keyCode === 38) {
+      this.gotoSelectDelta(-1);
+    }
+
+    if(event.keyCode===32){
+     this.focusNode()
+    }
   }
 
   render() {
@@ -80,27 +124,23 @@ export class EditableTree extends Component {
             generateNodeProps={(rowInfo) => {
               const { node, path } = rowInfo;
               let nodeProps = {
-                onClick: (event) => this.nodeClicked(event, rowInfo),
-                onFocus: (event) => console.log("on focus"),
+                onClick: (event) => this.handleNodeClicked(event, rowInfo),
+                // onFocus: (event) => console.log("on focus"),
                 title: (
                   <EditableNode
                     title={node.name}
                     onKeyDown={(event) =>
-                      this.keyInNodeEditing(event, node, path)
+                      this.handleKeyInNodeEditing(event, node, path)
                     }
                     innerRef={(en) => (this[`ref-en-${node.id}`] = en)}
-                    onBlur={(event) => {
-                      console.log("on blur");
-                      console.log(event.target);
-                      console.log(event.relatedTarget);
-                    }}
                     onChange={(event) =>
-                      this.nodeTitleChanged(event, node, path)
+                      this.handleNodeTitleChanged(event, node, path)
                     }
                   />
                 ),
               };
               if (this.state.selectedNodeId === rowInfo.node.id) {
+                this.rowInfo = rowInfo;
                 nodeProps.className = "selected-node";
               }
               return nodeProps;

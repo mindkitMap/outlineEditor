@@ -1,9 +1,7 @@
 import React from "react";
-import ContentEditable from "react-contenteditable";
+import ContentEditable from "./ContentEditable";
 
 export class EditableNode extends React.Component {
- 
-
   render = () => {
     return (
       <ContentEditable
