@@ -106,6 +106,8 @@ export class EditableTree extends Component {
     }
 
     if(event.keyCode===32){
+          event.stopPropagation();
+
      this.focusNode()
     }
   }
@@ -138,10 +140,11 @@ export class EditableTree extends Component {
                     }
                   />
                 ),
+                className:'node-text'
               };
               if (this.state.selectedNodeId === rowInfo.node.id) {
                 this.rowInfo = rowInfo;
-                nodeProps.className = "selected-node";
+                nodeProps.className = "selected-node node-text";
               }
               return nodeProps;
             }}

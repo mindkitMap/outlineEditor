@@ -2,3 +2,12 @@
   box-shadow: 0 0 0 2px #4285fa;
   border-bottom: 1px solid #ccc;
 }
+.node-text {
+  font-family: PingFang SC Light, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
+  font-weight: lighter;
+}
+
+
+:focus {
+  outline: 1px dashed #3e70aa;
+}

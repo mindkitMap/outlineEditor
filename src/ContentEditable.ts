@@ -44,6 +44,7 @@ export default class ContentEditable extends React.Component<Props> {
   render() {
     const { tagName, html, innerRef, ...props } = this.props;
 
+    // eslint-disable-next-line react/no-danger-with-children
     return React.createElement(
       tagName || "div",
       {
