@@ -11,6 +11,7 @@ export class EditableNode extends React.Component {
         onChange={this.props.onChange} // handle innerHTML change
         onKeyDown={this.props.onKeyDown}
         onBlur={this.props.onBlur}
+        onFocus={this.props.onFocus}
         innerRef={this.props.innerRef}
       />
     );
