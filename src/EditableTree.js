@@ -3,9 +3,13 @@ import SortableTree, {
   changeNodeAtPath,
   getVisibleNodeInfoAtIndex,
   find,
+  insertNode,
+  removeNode,
 } from "react-sortable-tree";
 import { EditableNode } from "./EditableNode";
 import { data } from "./data";
+import { momentString, uuid, equalsStringArray } from "./Util";
+
 // In your own app, you would need to use import styles once in the app
 // import 'react-sortable-tree/styles.css';
 
@@ -19,13 +23,17 @@ export class EditableTree extends Component {
 
     this.treeRef = React.createRef();
   }
-  selectNode(rowInfo) {
-    this.setState({ ...this.state, selectedNodeId: rowInfo.node.id });
+  selectNodeAsync(id) {
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.selectNode(id), 0);
   }
-  focusNode(){
+  selectNode(id) {
+    this.setState({ ...this.state, selectedNodeId: id });
+  }
+  focusSelectedNode() {
     const ref = this[`ref-en-${this.state.selectedNodeId}`];
-    if(ref){
-      ref.focus()
+    if (ref) {
+      ref.focus();
     }
   }
   handleNodeClicked(event, rowInfo) {
@@ -34,7 +42,7 @@ export class EditableTree extends Component {
       event.target.className.includes("expandButton")
     ) {
     } else {
-      this.selectNode(rowInfo);
+      this.selectNode(rowInfo.node.id);
     }
   }
 
@@ -65,15 +73,29 @@ export class EditableTree extends Component {
       this.treeRef.current.focus();
     }
   }
-  //return rowInfo
+
   findNextRowInfo(rowInfo, delta = 1) {
+    // console.log(rowInfo);
+    /*
+      rowInfo -----
+      isSearchFocus: false
+      isSearchMatch: false
+      lowerSiblingCounts: [0]
+      node: {id: "b002", name: "Regional Manager", expanded: true, type: "typeB", starts_with: "simple", …}
+      parentNode: null
+      path: ["b002"]
+      treeIndex: 1
+     */
     const { treeIndex } = rowInfo;
     const next = getVisibleNodeInfoAtIndex({
       treeData: this.state.treeData,
       index: treeIndex + delta,
       getNodeKey: this.getNodeKey,
     });
-    console.log(next);
+    // console.log(next);
+    /**
+     * {node: {…}, lowerSiblingCounts: Array(1), path: Array(1)}
+     */
     return next;
   }
 
@@ -91,24 +113,91 @@ export class EditableTree extends Component {
       const newInfo = this.findNextRowInfo(this.rowInfo, delta);
       //不要去隐藏 root 了。
       if (newInfo && newInfo.path.length > 0) {
-        this.selectNode(newInfo);
+        this.selectNode(newInfo.node.id);
       }
     }
+  }
+  isParent(spath, ppath) {
+    return (
+      spath.length === ppath.length + 1 &&
+      equalsStringArray(spath.slice(0, ppath.length))
+    );
   }
   handleGeneralKeyDown(event) {
     // console.log("handleGeneralKeyDown");
     // console.log(event);
-    if (event.keyCode === 40) {
+    if (event.key === "ArrowDown") {
       this.gotoSelectDelta();
     }
-    if (event.keyCode === 38) {
+    if (event.key === "ArrowUp") {
       this.gotoSelectDelta(-1);
     }
 
-    if(event.keyCode===32){
-          event.stopPropagation();
+    if (event.key === " ") {
+      //FIXME 不是所有情况都要prevent， 造成了空格键无法在编辑时使用。
+      // event.preventDefault();
+      this.focusSelectedNode();
+    }
+    if (event.key === "Enter") {
+      //生成兄弟。
+      const id = uuid();
+      const re = insertNode({
+        treeData: this.state.treeData,
+        depth: this.rowInfo.path.length - 1,
+        minimumTreeIndex: this.rowInfo.treeIndex + 1,
+        newNode: { id, name: `${id.slice(0, 4)} ${momentString()}` },
+        getNodeKey: this.getNodeKey,
+      });
+      this.setState({ ...this.state, treeData: re.treeData });
+      this.selectNodeAsync(id);
+    }
+    if (event.key === "Tab") {
+      event.preventDefault();
+      //NOTE depth = path.length-1
+      const thisNode = this.rowInfo.node;
+      const nowDepth = this.rowInfo.path.length - 1;
 
-     this.focusNode()
+      const removed = removeNode({
+        treeData: this.state.treeData,
+        path: this.rowInfo.path,
+        getNodeKey: this.getNodeKey,
+      });
+
+      const newNode = removed.node;
+      const nowIndex = removed.treeIndex;
+      const re = insertNode({
+        treeData: removed.treeData,
+        depth: nowDepth + 1,
+        minimumTreeIndex: nowIndex,
+        newNode,
+        getNodeKey: this.getNodeKey,
+        expandParent:true
+      });
+      this.setState({ ...this.state, treeData: re.treeData });
+      this.selectNodeAsync(thisNode.id);
+    }
+    if (event.shiftKey && event.key === "Tab") {
+      const thisNode = this.rowInfo.node;
+      const nowDepth = this.rowInfo.path.length - 1;
+
+      const removed = removeNode({
+        treeData: this.state.treeData,
+        path: this.rowInfo.path,
+        getNodeKey: this.getNodeKey,
+      });
+
+      const newNode = removed.node;
+      const nowIndex = removed.treeIndex;
+      const re = insertNode({
+        treeData: removed.treeData,
+        depth: nowDepth - 1,
+        minimumTreeIndex: nowIndex,
+        newNode,
+        getNodeKey: this.getNodeKey,
+        expandParent: true,
+      });
+      this.setState({ ...this.state, treeData: re.treeData });
+      this.selectNodeAsync(thisNode.id);
     }
   }
 
@@ -118,7 +207,7 @@ export class EditableTree extends Component {
         ref={this.treeRef}
         onKeyDown={(event) => this.handleGeneralKeyDown(event)}
       >
-        <div style={{ height: 500 }}>
+        <div style={{ height: 700 }}>
           <SortableTree
             treeData={this.state.treeData}
             getNodeKey={this.getNodeKey}
@@ -140,7 +229,7 @@ export class EditableTree extends Component {
                     }
                   />
                 ),
-                className:'node-text'
+                className: "node-text",
               };
               if (this.state.selectedNodeId === rowInfo.node.id) {
                 this.rowInfo = rowInfo;
