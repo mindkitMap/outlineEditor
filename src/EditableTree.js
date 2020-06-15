@@ -9,8 +9,8 @@ import SortableTree, {
 import { EditableNode } from "./EditableNode";
 import { data } from "./data";
 import { momentString, uuid } from "./Util";
+//TODO 需要一个好一点的theme，主要是要紧凑一点。
 
-// In your own app, you would need to use import styles once in the app
 // import 'react-sortable-tree/styles.css';
 
 export class EditableTree extends Component {
@@ -145,7 +145,10 @@ export class EditableTree extends Component {
   enterEditing(triggerEvent) {
     const before = this.isEditing();
     this.focusSelectedNode();
-    if (!before && this.isEditing()) triggerEvent.preventDefault();
+    if (!before && this.isEditing()) {
+      document.execCommand("selectAll", false, null);
+      triggerEvent.preventDefault();
+    }
   }
   exitEditing(triggerEvent) {
     if (this.isEditing()) {
@@ -159,6 +162,7 @@ export class EditableTree extends Component {
   }
 
   handleGeneralKeyDown(event) {
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === "ArrowDown") {
       this.exitEditing();
       this.gotoSelectDelta();
@@ -201,9 +205,13 @@ export class EditableTree extends Component {
       <div
         ref={this.treeRef}
         onKeyDown={(event) => this.handleGeneralKeyDown(event)}
+        tabIndex={-1}
       >
         <div style={{ height: 700 }}>
           <SortableTree
+            // theme={MaterialTheme}
+            scaffoldBlockPxWidth={32}
+            rowHeight={48}
             treeData={this.state.treeData}
             getNodeKey={this.getNodeKey}
             onChange={(treeData) => this.setState({ ...this.state, treeData })}
