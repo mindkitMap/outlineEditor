@@ -1,18 +1,21 @@
 .selected-node {
-  /* box-shadow: 0 0 0 2px #4285fa;
-  border-bottom: 1px solid #ccc; */
-  background-color: rgba(187, 217, 235, 0.507);
+  background-color: rgba(187, 217, 235, 0.5);
 }
 .node-text {
   font-family: PingFang SC Light, Lantinghei SC, Microsoft Yahei,
     Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
   font-weight: lighter;
 }
-
+.treeFocusBoundary:focus{
+  /* TODO 貌似没有生效？ 不过影响小。 */
+  outline: none
+}
 :focus {
-  outline: 1px dashed rgba(62, 112, 170, 0.507);
+  outline: 1px dashed rgba(62, 112, 170, 0.5);
   outline-offset: 5px;
 }
+
+
 
 .rst__row {
   align-items: center;
@@ -27,7 +30,7 @@
   margin-right: 5px;
   width: 10px;
   height: 10px;
-  background: #ccc no-repeat center;
+  background: rgba(204, 204, 204, 0.75) no-repeat center;
   border-radius: 5px;
 }
 .rst__rowContents {
@@ -41,7 +44,7 @@
   border-radius: 0px;
 }
 .rst__rowLabel {
-  width: 100%;
+  width: 85%;
 }
 .rst__lineHalfHorizontalRight::before,
 .rst__lineFullVertical::after,
@@ -49,4 +52,8 @@
 .rst__lineChildren::after,
 .rst__lineHalfVerticalBottom::after {
   background-color: #ccc;
+}
+
+.rst__nodeContent{
+  width: 70%
 }

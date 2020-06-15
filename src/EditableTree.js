@@ -7,7 +7,6 @@ import SortableTree, {
   removeNode,
 } from "react-sortable-tree";
 import { EditableNode } from "./EditableNode";
-import { data } from "./data";
 import { momentString, uuid } from "./Util";
 //TODO 需要一个好一点的theme，主要是要紧凑一点。
 
@@ -17,9 +16,13 @@ export class EditableTree extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      treeData: data,
+      treeData: props.treeData,
     };
     this.treeRef = React.createRef();
+  }
+  fireDataChange(treeData) {
+    // eslint-disable-next-line no-unused-expressions
+    this.props.onDataChange?.(treeData);
   }
   selectNodeAsync(id) {
     clearTimeout(this.timeout);
@@ -58,6 +61,7 @@ export class EditableTree extends Component {
       expandParent: true,
     });
     this.setState({ ...this.state, treeData: re.treeData });
+    this.fireDataChange(this.state.treeData);
     this.selectNodeAsync(thisNode.id);
   }
 
@@ -71,8 +75,8 @@ export class EditableTree extends Component {
     }
   }
 
-  handleNodeTitleChanged(event, node, path) {
-    const newNode = { ...node, name: event.target.value };
+  handleNodeTitleChanged(event, node, path, newValue) {
+    const newNode = { ...node, text: newValue };
     this.setState({
       ...this.state,
       treeData: changeNodeAtPath({
@@ -82,6 +86,7 @@ export class EditableTree extends Component {
         getNodeKey: this.getNodeKey,
       }),
     });
+    this.fireDataChange(this.state.treeData);
   }
   handleKeyInNodeEditing(event, node, path) {}
 
@@ -92,7 +97,7 @@ export class EditableTree extends Component {
       isSearchFocus: false
       isSearchMatch: false
       lowerSiblingCounts: [0]
-      node: {id: "b002", name: "Regional Manager", expanded: true, type: "typeB", starts_with: "simple", …}
+      node: {id: "b002", text: "Regional Manager", expanded: true, type: "typeB", starts_with: "simple", …}
       parentNode: null
       path: ["b002"]
       treeIndex: 1
@@ -114,10 +119,12 @@ export class EditableTree extends Component {
       treeData: this.state.treeData,
       depth: this.rowInfo.path.length - 1,
       minimumTreeIndex: this.rowInfo.treeIndex + 1,
-      newNode: { id, name: `${id.slice(0, 4)} ${momentString()}` },
+      newNode: { id, text: `${id.slice(0, 4)} ${momentString()}` },
       getNodeKey: this.getNodeKey,
     });
     this.setState({ ...this.state, treeData: re.treeData });
+    this.fireDataChange(this.state.treeData);
+
     this.selectNodeAsync(id);
   }
   findById(nodeId) {
@@ -126,7 +133,7 @@ export class EditableTree extends Component {
       searchMethod: (node) => node.id === nodeId,
       getNodeKey: this.getNodeKey,
     });
-    console.log(re);
+    // console.log(re);
     return re?.matches?.[0]?.node;
   }
   gotoSelectDelta(delta = 1) {
@@ -152,6 +159,9 @@ export class EditableTree extends Component {
   }
   exitEditing(triggerEvent) {
     if (this.isEditing()) {
+      const nodeId = this.editingNodeId;
+
+      //FIXME fire change data event
       const ref = this[`ref-en-${this.editingNodeId}`];
       if (ref) {
         ref.blur();
@@ -197,12 +207,13 @@ export class EditableTree extends Component {
   handleNodeTextFocus(event, nodeId, focus = true) {
     if (focus) this.editingNodeId = nodeId;
     else this.editingNodeId = undefined;
-    console.log("editing - " + this.editingNodeId);
+    // console.log("editing - " + this.editingNodeId);
   }
 
   render() {
     return (
       <div
+        className={"treeFocusBoundary"}
         ref={this.treeRef}
         onKeyDown={(event) => this.handleGeneralKeyDown(event)}
         tabIndex={-1}
@@ -214,24 +225,39 @@ export class EditableTree extends Component {
             rowHeight={48}
             treeData={this.state.treeData}
             getNodeKey={this.getNodeKey}
-            onChange={(treeData) => this.setState({ ...this.state, treeData })}
+            onChange={(treeData) => {
+              this.setState({ ...this.state, treeData });
+              this.fireDataChange(this.state.treeData);
+            }}
             generateNodeProps={(rowInfo) => {
               const { node, path } = rowInfo;
               let nodeProps = {
                 onClick: (event) => this.handleNodeClicked(event, rowInfo),
                 title: (
                   <EditableNode
-                    title={node.name}
+                    title={node.text}
                     onKeyDown={(event) =>
                       this.handleKeyInNodeEditing(event, node, path)
                     }
                     onFocus={(ev) => this.handleNodeTextFocus(ev, node.id)}
-                    onBlur={(ev) =>
-                      this.handleNodeTextFocus(ev, node.id, false)
-                    }
+                    onBlur={(ev) => {
+                      this.handleNodeTitleChanged(
+                        ev,
+                        node,
+                        path,
+                        //MARK 这里可能要改，innerText可能不等于纯node.text，innerText可能等于text->html之后的那个text。
+                        ev.target.innerText
+                      );
+                      this.handleNodeTextFocus(ev, node.id, false);
+                    }}
                     innerRef={(en) => (this[`ref-en-${node.id}`] = en)}
                     onChange={(event) =>
-                      this.handleNodeTitleChanged(event, node, path)
+                      this.handleNodeTitleChanged(
+                        event,
+                        node,
+                        path,
+                        event.target.value
+                      )
                     }
                   />
                 ),

@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "react-sortable-tree/style.css";
 import "./spreadsheet.css";
+import App from "./App"
 
-import { EditableTree } from "./EditableTree";
 
 const rootElement = document.getElementById("root");
-ReactDOM.render(<EditableTree />, rootElement);
+ReactDOM.render(<App/>, rootElement);
