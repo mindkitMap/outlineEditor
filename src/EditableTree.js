@@ -8,7 +8,6 @@ import SortableTree, {
 } from "react-sortable-tree";
 import { EditableNode } from "./EditableNode";
 import { momentString, uuid } from "./Util";
-//TODO 需要一个好一点的theme，主要是要紧凑一点。
 
 // import 'react-sortable-tree/styles.css';
 
@@ -25,8 +24,8 @@ export class EditableTree extends Component {
     this.props.onDataChange?.(treeData);
   }
   selectNodeAsync(id) {
-    clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.selectNode(id), 0);
+    clearTimeout(this.selectNodeAsyncTimeout);
+    this.selectNodeAsyncTimeout = setTimeout(() => this.selectNode(id), 0);
   }
   selectNode(id) {
     this.setState({ ...this.state, selectedNodeId: id });
@@ -61,7 +60,7 @@ export class EditableTree extends Component {
       expandParent: true,
     });
     this.setState({ ...this.state, treeData: re.treeData });
-    this.fireDataChange(this.state.treeData);
+    this.fireDataChange(re.treeData);
     this.selectNodeAsync(thisNode.id);
   }
 
@@ -76,17 +75,22 @@ export class EditableTree extends Component {
   }
 
   handleNodeTitleChanged(event, node, path, newValue) {
+    // console.log(node)
+    // console.log(path)
+    // console.log(newValue)
+    // console.log(this.rowInfo.path)
     const newNode = { ...node, text: newValue };
-    this.setState({
-      ...this.state,
-      treeData: changeNodeAtPath({
+    const newTree=  changeNodeAtPath({
         treeData: this.state.treeData,
-        path,
+        path:this.rowInfo.path,
         newNode,
         getNodeKey: this.getNodeKey,
-      }),
+      })
+    this.setState({
+      ...this.state,
+      treeData: newTree,
     });
-    this.fireDataChange(this.state.treeData);
+    this.fireDataChange(newTree);
   }
   handleKeyInNodeEditing(event, node, path) {}
 
@@ -123,7 +127,7 @@ export class EditableTree extends Component {
       getNodeKey: this.getNodeKey,
     });
     this.setState({ ...this.state, treeData: re.treeData });
-    this.fireDataChange(this.state.treeData);
+    this.fireDataChange(re.treeData);
 
     this.selectNodeAsync(id);
   }
@@ -227,7 +231,7 @@ export class EditableTree extends Component {
             getNodeKey={this.getNodeKey}
             onChange={(treeData) => {
               this.setState({ ...this.state, treeData });
-              this.fireDataChange(this.state.treeData);
+              this.fireDataChange(treeData);
             }}
             generateNodeProps={(rowInfo) => {
               const { node, path } = rowInfo;
@@ -251,14 +255,16 @@ export class EditableTree extends Component {
                       this.handleNodeTextFocus(ev, node.id, false);
                     }}
                     innerRef={(en) => (this[`ref-en-${node.id}`] = en)}
-                    onChange={(event) =>
+                    onChange={(event) =>{
+                      console.log('on content change')
+                      // console.log(event)
                       this.handleNodeTitleChanged(
                         event,
                         node,
                         path,
                         event.target.value
                       )
-                    }
+                    }}
                   />
                 ),
                 className: "node-text",

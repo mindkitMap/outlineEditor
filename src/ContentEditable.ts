@@ -30,6 +30,7 @@ function replaceCaret(el: HTMLElement) {
  */
 export default class ContentEditable extends React.Component<Props> {
   lastHtml: string = this.props.html;
+  keyTimeout: any;
   el: any =
     typeof this.props.innerRef === "function"
       ? { current: null }
@@ -56,10 +57,27 @@ export default class ContentEditable extends React.Component<Props> {
                 this.el.current = current;
               }
             : innerRef || this.el,
-        onInput: this.emitChange,
-        onBlur: this.props.onBlur || this.emitChange,
-        onKeyUp: this.props.onKeyUp || this.emitChange,
-        onKeyDown: this.props.onKeyDown || this.emitChange,
+        // onInput: this.emitChange,
+        onBlur: (event) => {
+          this.props.onBlur?.(event);
+          this.emitChange(event);
+          if (this.keyTimeout) clearTimeout(this.keyTimeout);
+        },
+        // onKeyUp: this.props.onKeyUp || this.emitChange,
+        onKeyDown: (event) => {
+          if (event.isComposing || event.keyCode === 229) return;
+          this.props.onKeyDown?.(event);
+          this.emitChange(event);
+          event.persist();
+          if (this.keyTimeout) clearTimeout(this.keyTimeout);
+          this.keyTimeout = setTimeout(() => this.emitChange(event), 1000);
+        },
+        // onKeyUp: (event) => {
+        //   console.log(event);
+        //   if (event.isComposing || event.keyCode === 229) return;
+        //   this.props.onKeyUp?.(event);
+        //   this.emitChange(event);
+        // },
         contentEditable: !this.props.disabled,
         dangerouslySetInnerHTML: { __html: html },
       },
@@ -87,7 +105,7 @@ export default class ContentEditable extends React.Component<Props> {
       props.disabled !== nextProps.disabled ||
       props.tagName !== nextProps.tagName ||
       props.className !== nextProps.className ||
-    //   props.innerRef !== nextProps.innerRef ||
+      //   props.innerRef !== nextProps.innerRef ||
       !deepEqual(props.style, nextProps.style)
     );
   }
@@ -106,10 +124,18 @@ export default class ContentEditable extends React.Component<Props> {
   }
 
   emitChange = (originalEvt: React.SyntheticEvent<any>) => {
+    // console.log('in emit')
+    // console.log(originalEvt.type)
     const el = this.getEl();
     if (!el) return;
 
     const html = el.innerHTML;
+    // console.log(el.innerHTML)
+    // console.log(el.innerText)
+    // console.log(originalEvt.isComposin)
+    console.log(originalEvt.type);
+    console.log(html);
+    console.log(this.lastHtml);
     if (this.props.onChange && html !== this.lastHtml) {
       // Clone event with Object.assign to avoid
       // "Cannot assign to read only property 'target' of object"
