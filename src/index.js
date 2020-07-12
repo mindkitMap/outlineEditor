@@ -1,9 +1,12 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import "react-sortable-tree/style.css";
-import "./spreadsheet.css";
-import App from "./App"
+import { asFormField } from "./AsFormField";
+import FocusContainer from "./FocusContainer";
+import { EditableTree } from "./EditableTree";
 
+const Editor = asFormField(
+  <FocusContainer>
+    <EditableTree />
+  </FocusContainer>
+);
 
-const rootElement = document.getElementById("root");
-ReactDOM.render(<App/>, rootElement);
+export default Editor;

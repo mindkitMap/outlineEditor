@@ -1,6 +1,7 @@
 import * as React from "react";
 import deepEqual from "fast-deep-equal";
 import * as PropTypes from "prop-types";
+import _ from "lodash";
 
 function normalizeHtml(str: string): string {
   return str && str.replace(/&nbsp;|\u202F|\u00A0/g, " ");
@@ -41,10 +42,10 @@ export default class ContentEditable extends React.Component<Props> {
       ? this.props.innerRef
       : this.el
     ).current;
-
   render() {
     const { tagName, html, innerRef, ...props } = this.props;
-
+    console.log("in render of ce");
+    console.log(html);
     // eslint-disable-next-line react/no-danger-with-children
     return React.createElement(
       tagName || "div",
@@ -59,25 +60,19 @@ export default class ContentEditable extends React.Component<Props> {
             : innerRef || this.el,
         // onInput: this.emitChange,
         onBlur: (event) => {
+          console.log("in ce blur");
+          this.debChange(event);
           this.props.onBlur?.(event);
-          this.emitChange(event);
-          if (this.keyTimeout) clearTimeout(this.keyTimeout);
         },
         // onKeyUp: this.props.onKeyUp || this.emitChange,
         onKeyDown: (event) => {
-          if (event.isComposing || event.keyCode === 229) return;
-          this.props.onKeyDown?.(event);
-          this.emitChange(event);
+          // if (event. isComposing || event.keyCode === 229) return;
+          if (event.keyCode === 229) return;
           event.persist();
-          if (this.keyTimeout) clearTimeout(this.keyTimeout);
-          this.keyTimeout = setTimeout(() => this.emitChange(event), 1000);
+          this.debChange(event);
+          this.props.onKeyDown?.(event);
         },
-        // onKeyUp: (event) => {
-        //   console.log(event);
-        //   if (event.isComposing || event.keyCode === 229) return;
-        //   this.props.onKeyUp?.(event);
-        //   this.emitChange(event);
-        // },
+
         contentEditable: !this.props.disabled,
         dangerouslySetInnerHTML: { __html: html },
       },
@@ -85,30 +80,30 @@ export default class ContentEditable extends React.Component<Props> {
     );
   }
 
-  shouldComponentUpdate(nextProps: Props): boolean {
-    const { props } = this;
-    const el = this.getEl();
+  // shouldComponentUpdate(nextProps: Props): boolean {
+  //   const { props } = this;
+  //   const el = this.getEl();
 
-    // We need not rerender if the change of props simply reflects the user's edits.
-    // Rerendering in this case would make the cursor/caret jump
+  //   // We need not rerender if the change of props simply reflects the user's edits.
+  //   // Rerendering in this case would make the cursor/caret jump
 
-    // Rerender if there is no element yet... (somehow?)
-    if (!el) return true;
+  //   // Rerender if there is no element yet... (somehow?)
+  //   if (!el) return true;
 
-    // ...or if html really changed... (programmatically, not by user edit)
-    if (normalizeHtml(nextProps.html) !== normalizeHtml(el.innerHTML)) {
-      return true;
-    }
+  //   // ...or if html really changed... (programmatically, not by user edit)
+  //   if (normalizeHtml(nextProps.html) !== normalizeHtml(el.innerHTML)) {
+  //     return true;
+  //   }
 
-    // Handle additional properties
-    return (
-      props.disabled !== nextProps.disabled ||
-      props.tagName !== nextProps.tagName ||
-      props.className !== nextProps.className ||
-      //   props.innerRef !== nextProps.innerRef ||
-      !deepEqual(props.style, nextProps.style)
-    );
-  }
+  //   // Handle additional properties
+  //   return (
+  //     props.disabled !== nextProps.disabled ||
+  //     props.tagName !== nextProps.tagName ||
+  //     props.className !== nextProps.className ||
+  //     //   props.innerRef !== nextProps.innerRef ||
+  //     !deepEqual(props.style, nextProps.style)
+  //   );
+  // }
 
   componentDidUpdate() {
     const el = this.getEl();
@@ -124,18 +119,10 @@ export default class ContentEditable extends React.Component<Props> {
   }
 
   emitChange = (originalEvt: React.SyntheticEvent<any>) => {
-    // console.log('in emit')
-    // console.log(originalEvt.type)
     const el = this.getEl();
     if (!el) return;
 
     const html = el.innerHTML;
-    // console.log(el.innerHTML)
-    // console.log(el.innerText)
-    // console.log(originalEvt.isComposin)
-    console.log(originalEvt.type);
-    console.log(html);
-    console.log(this.lastHtml);
     if (this.props.onChange && html !== this.lastHtml) {
       // Clone event with Object.assign to avoid
       // "Cannot assign to read only property 'target' of object"
@@ -144,10 +131,12 @@ export default class ContentEditable extends React.Component<Props> {
           value: html,
         },
       });
+      console.log("in ce, will fire on change - " + html);
       this.props.onChange(evt);
     }
     this.lastHtml = html;
   };
+  debChange = _.debounce(this.emitChange, 100);
 
   static propTypes = {
     html: PropTypes.string.isRequired,

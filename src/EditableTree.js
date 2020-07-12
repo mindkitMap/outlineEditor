@@ -11,6 +11,8 @@ import { momentString, uuid } from "./Util";
 
 // import 'react-sortable-tree/styles.css';
 
+//TODO 难点似乎是onblur onfocus？
+
 export class EditableTree extends Component {
   constructor(props) {
     super(props);
@@ -79,20 +81,24 @@ export class EditableTree extends Component {
     // console.log(path)
     // console.log(newValue)
     // console.log(this.rowInfo.path)
+    console.log("in tree change handle - " + newValue);
     const newNode = { ...node, text: newValue };
-    const newTree=  changeNodeAtPath({
-        treeData: this.state.treeData,
-        path:this.rowInfo.path,
-        newNode,
-        getNodeKey: this.getNodeKey,
-      })
+    const newTree = changeNodeAtPath({
+      treeData: this.state.treeData,
+      path: path,
+      newNode,
+      getNodeKey: this.getNodeKey,
+    });
+    console.log(newTree);
+    // setTimeout(()=>
     this.setState({
       ...this.state,
       treeData: newTree,
     });
     this.fireDataChange(newTree);
+    // ,0)
   }
-  handleKeyInNodeEditing(event, node, path) {}
+  // handleKeyInNodeEditing(event, node, path) {}
 
   findNextRowInfo(rowInfo, delta = 1) {
     // console.log(rowInfo);
@@ -193,9 +199,10 @@ export class EditableTree extends Component {
     }
     if (event.key === "Enter") {
       this.exitEditing();
-
       //生成兄弟。
-      this.createLowSibling();
+      // setTimeout(() => 
+      this.createLowSibling()
+      // , 0);
     }
     if (event.key === "Tab") {
       this.indentNode();
@@ -211,7 +218,6 @@ export class EditableTree extends Component {
   handleNodeTextFocus(event, nodeId, focus = true) {
     if (focus) this.editingNodeId = nodeId;
     else this.editingNodeId = undefined;
-    // console.log("editing - " + this.editingNodeId);
   }
 
   render() {
@@ -221,6 +227,8 @@ export class EditableTree extends Component {
         ref={this.treeRef}
         onKeyDown={(event) => this.handleGeneralKeyDown(event)}
         tabIndex={-1}
+        onBlur={this.props.onBlur}
+        onFocus={this.props.onFocus}
       >
         <div style={{ height: 700 }}>
           <SortableTree
@@ -240,30 +248,35 @@ export class EditableTree extends Component {
                 title: (
                   <EditableNode
                     title={node.text}
-                    onKeyDown={(event) =>
-                      this.handleKeyInNodeEditing(event, node, path)
-                    }
-                    onFocus={(ev) => this.handleNodeTextFocus(ev, node.id)}
+                    onFocus={(ev) => {
+                      this.handleNodeTextFocus(ev, node.id);
+                    }}
+                    //FIXME 由contenteditable blur引发的onchange不能生效，因为change node 以后没有刷新。blur之后刷新，ce的值被还原。
+                    //FIXME 重现： 输入汉字，不要标点符号，直接回车。
                     onBlur={(ev) => {
-                      this.handleNodeTitleChanged(
-                        ev,
-                        node,
-                        path,
-                        //MARK 这里可能要改，innerText可能不等于纯node.text，innerText可能等于text->html之后的那个text。
-                        ev.target.innerText
-                      );
+                      // this.handleNodeTitleChanged(
+                      //   ev,
+                      //   node,
+                      //   path,
+                      //   //MARK 这里可能要改，innerText可能不等于纯node.text，innerText可能等于text->html之后的那个text。
+                      //   ev.target.value
+                      // );
+                      console.log("in onB handler of ce");
                       this.handleNodeTextFocus(ev, node.id, false);
+                      // ev.stopPropagation();
                     }}
                     innerRef={(en) => (this[`ref-en-${node.id}`] = en)}
-                    onChange={(event) =>{
-                      console.log('on content change')
+                    onChange={(event) => {
+                      // console.log("on content change");
                       // console.log(event)
+                      console.log("in onC handler of ce");
+
                       this.handleNodeTitleChanged(
                         event,
                         node,
                         path,
                         event.target.value
-                      )
+                      );
                     }}
                   />
                 ),
