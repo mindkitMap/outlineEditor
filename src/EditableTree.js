@@ -17,13 +17,13 @@ export class EditableTree extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      treeData: props.treeData,
+      treeData: props.value,
     };
     this.treeRef = React.createRef();
   }
   fireDataChange(treeData) {
     // eslint-disable-next-line no-unused-expressions
-    this.props.onDataChange?.(treeData);
+    this.props.onChange?.(treeData);
   }
   selectNodeAsync(id) {
     clearTimeout(this.selectNodeAsyncTimeout);

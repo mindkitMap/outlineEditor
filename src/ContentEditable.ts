@@ -1,29 +1,9 @@
-import * as React from "react";
-import deepEqual from "fast-deep-equal";
-import * as PropTypes from "prop-types";
+import  React from "react";
+import PropTypes from "prop-types";
 import _ from "lodash";
 
 function normalizeHtml(str: string): string {
   return str && str.replace(/&nbsp;|\u202F|\u00A0/g, " ");
-}
-
-function replaceCaret(el: HTMLElement) {
-  // Place the caret at the end of the element
-  const target = document.createTextNode("");
-  el.appendChild(target);
-  // do not move caret if element was not focused
-  const isTargetFocused = document.activeElement === el;
-  if (target !== null && target.nodeValue !== null && isTargetFocused) {
-    var sel = window.getSelection();
-    if (sel !== null) {
-      var range = document.createRange();
-      range.setStart(target, target.nodeValue.length);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-    if (el instanceof HTMLElement) el.focus();
-  }
 }
 
 /**
@@ -31,21 +11,24 @@ function replaceCaret(el: HTMLElement) {
  */
 export default class ContentEditable extends React.Component<Props> {
   lastHtml: string = this.props.html;
-  keyTimeout: any;
+  originalHTML: string = this.props.html;
   el: any =
     typeof this.props.innerRef === "function"
       ? { current: null }
       : React.createRef<HTMLElement>();
 
+  transform = (inputtedHtml: string): string => {
+    const fun = this.props.transform ?? ((v) => v);
+    return fun(inputtedHtml);
+  };
   getEl = () =>
     (this.props.innerRef && typeof this.props.innerRef !== "function"
       ? this.props.innerRef
       : this.el
     ).current;
+
   render() {
-    const { tagName, html, innerRef, ...props } = this.props;
-    console.log("in render of ce");
-    console.log(html);
+    const { tagName, html, innerRef, transform,...props } = this.props;
     // eslint-disable-next-line react/no-danger-with-children
     return React.createElement(
       tagName || "div",
@@ -58,64 +41,41 @@ export default class ContentEditable extends React.Component<Props> {
                 this.el.current = current;
               }
             : innerRef || this.el,
-        // onInput: this.emitChange,
+        //NOTE 只有input会fire change， 其他不会，比如程序去改变。
+        onInput: (e) => {
+          if (!e.nativeEvent.isComposing) {
+            this.debChange(e);
+          }
+        },
+        onFocus: (event) => {
+          const el = this.getEl();
+          if (el) {
+            el.innerHTML = this.originalHTML ?? this.props.html;
+          }
+          this.props.onFocus?.(event);
+        },
         onBlur: (event) => {
-          console.log("in ce blur");
-          this.debChange(event);
+          this.emitChange(event);
+          const el = this.getEl();
+          if (el) {
+            this.originalHTML = el.innerHTML;
+            el.innerHTML = this.transform(this.originalHTML);
+          }
+
           this.props.onBlur?.(event);
         },
-        // onKeyUp: this.props.onKeyUp || this.emitChange,
+        onKeyUp: (event) => {
+          this.props.onKeyUp?.(event);
+        },
         onKeyDown: (event) => {
-          // if (event. isComposing || event.keyCode === 229) return;
-          if (event.keyCode === 229) return;
-          event.persist();
-          this.debChange(event);
           this.props.onKeyDown?.(event);
         },
 
         contentEditable: !this.props.disabled,
-        dangerouslySetInnerHTML: { __html: html },
+        dangerouslySetInnerHTML: { __html: this.transform(html) },
       },
       this.props.children
     );
-  }
-
-  // shouldComponentUpdate(nextProps: Props): boolean {
-  //   const { props } = this;
-  //   const el = this.getEl();
-
-  //   // We need not rerender if the change of props simply reflects the user's edits.
-  //   // Rerendering in this case would make the cursor/caret jump
-
-  //   // Rerender if there is no element yet... (somehow?)
-  //   if (!el) return true;
-
-  //   // ...or if html really changed... (programmatically, not by user edit)
-  //   if (normalizeHtml(nextProps.html) !== normalizeHtml(el.innerHTML)) {
-  //     return true;
-  //   }
-
-  //   // Handle additional properties
-  //   return (
-  //     props.disabled !== nextProps.disabled ||
-  //     props.tagName !== nextProps.tagName ||
-  //     props.className !== nextProps.className ||
-  //     //   props.innerRef !== nextProps.innerRef ||
-  //     !deepEqual(props.style, nextProps.style)
-  //   );
-  // }
-
-  componentDidUpdate() {
-    const el = this.getEl();
-    if (!el) return;
-
-    // Perhaps React (whose VDOM gets outdated because we often prevent
-    // rerendering) did not update the DOM. So we update it manually now.
-    if (this.props.html !== el.innerHTML) {
-      el.innerHTML = this.props.html;
-    }
-    this.lastHtml = this.props.html;
-    replaceCaret(el);
   }
 
   emitChange = (originalEvt: React.SyntheticEvent<any>) => {
@@ -126,12 +86,15 @@ export default class ContentEditable extends React.Component<Props> {
     if (this.props.onChange && html !== this.lastHtml) {
       // Clone event with Object.assign to avoid
       // "Cannot assign to read only property 'target' of object"
-      const evt = Object.assign({}, originalEvt, {
+      originalEvt.persist();
+      const evt = {
+        ...originalEvt,
         target: {
+          ...originalEvt.target,
           value: html,
         },
-      });
-      console.log("in ce, will fire on change - " + html);
+      };
+      // console.log("emit change onchange");
       this.props.onChange(evt);
     }
     this.lastHtml = html;
@@ -146,6 +109,7 @@ export default class ContentEditable extends React.Component<Props> {
     className: PropTypes.string,
     style: PropTypes.object,
     innerRef: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+    transform: PropTypes.func
   };
 }
 
@@ -165,4 +129,5 @@ export interface Props extends DivProps {
   className?: string;
   style?: Object;
   innerRef?: React.RefObject<HTMLElement> | Function;
+  transform?: (string) => string;
 }

@@ -1,9 +1,8 @@
 import React from "react";
-import { asFormField } from "./AsFormField";
 import FocusContainer from "./FocusContainer";
 import { EditableTree } from "./EditableTree";
 
-const Editor = asFormField(
+const Editor = (
   <FocusContainer>
     <EditableTree />
   </FocusContainer>
