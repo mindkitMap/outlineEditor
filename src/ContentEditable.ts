@@ -1,9 +1,31 @@
-import  React from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
 
 function normalizeHtml(str: string): string {
   return str && str.replace(/&nbsp;|\u202F|\u00A0/g, " ");
+}
+//FIXME 显然有问题，每次都把光标放在最后。因为在onchange里面被rerender了，所以需要手动重置光标位置。
+//FIXME rerender是重置了html、onChange、onBlur等属性造成的。
+//FIXME onChange等应该是因为在parent中每次重新生成了函数。
+
+function replaceCaret(el: HTMLElement) {
+  // Place the caret at the end of the element
+  const target = document.createTextNode("");
+  el.appendChild(target);
+  // do not move caret if element was not focused
+  const isTargetFocused = document.activeElement === el;
+  if (target !== null && target.nodeValue !== null && isTargetFocused) {
+    var sel = window.getSelection();
+    if (sel !== null) {
+      var range = document.createRange();
+      range.setStart(target, target.nodeValue.length);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    if (el instanceof HTMLElement) el.focus();
+  }
 }
 
 /**
@@ -28,7 +50,7 @@ export default class ContentEditable extends React.Component<Props> {
     ).current;
 
   render() {
-    const { tagName, html, innerRef, transform,...props } = this.props;
+    const { tagName, html, innerRef, transform, ...props } = this.props;
     // eslint-disable-next-line react/no-danger-with-children
     return React.createElement(
       tagName || "div",
@@ -72,7 +94,9 @@ export default class ContentEditable extends React.Component<Props> {
         },
 
         contentEditable: !this.props.disabled,
-        dangerouslySetInnerHTML: { __html: this.transform(html) },
+        dangerouslySetInnerHTML: {
+          __html: this.transform(html),
+        },
       },
       this.props.children
     );
@@ -101,6 +125,22 @@ export default class ContentEditable extends React.Component<Props> {
   };
   debChange = _.debounce(this.emitChange, 100);
 
+  //NOTE 之前原文中有实现shouldupdate， 只在props.html与dom里面html不同的时候才去rerender，这样可以避免控制光标的问题。
+  //NOTE 现在基本上不用这个控件了，所以不关注这个。
+  //NOTE 如果需要，可以把原文重新拖过来一次。
+  componentDidUpdate() {
+    const el = this.getEl();
+    if (!el) return;
+
+    // // Perhaps React (whose VDOM gets outdated because we often prevent
+    // // rerendering) did not update the DOM. So we update it manually now.
+    // if (this.props.html !== el.innerHTML) {
+    //   el.innerHTML = this.props.html;
+    // }
+    // this.lastHtml = this.props.html;
+    replaceCaret(el);
+  }
+
   static propTypes = {
     html: PropTypes.string.isRequired,
     onChange: PropTypes.func,
@@ -109,7 +149,7 @@ export default class ContentEditable extends React.Component<Props> {
     className: PropTypes.string,
     style: PropTypes.object,
     innerRef: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
-    transform: PropTypes.func
+    transform: PropTypes.func,
   };
 }
 

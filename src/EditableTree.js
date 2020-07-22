@@ -6,14 +6,20 @@ import SortableTree, {
   insertNode,
   removeNode,
 } from "react-sortable-tree";
-import { EditableNode } from "./EditableNode";
 import { momentString, uuid } from "./Util";
+
+// import {defaultNodeCell} from "./DefaultNodeCell";
+import {defaultNodeCell} from "./TransformNodeCell";
+
+import "react-sortable-tree/style.css";
+
+import './spreadsheet.css'
 
 // import 'react-sortable-tree/styles.css';
 
 //TODO 难点似乎是onblur onfocus？
 
-export class EditableTree extends Component {
+class EditableTree extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -246,39 +252,9 @@ export class EditableTree extends Component {
               let nodeProps = {
                 onClick: (event) => this.handleNodeClicked(event, rowInfo),
                 title: (
-                  <EditableNode
-                    title={node.text}
-                    onFocus={(ev) => {
-                      this.handleNodeTextFocus(ev, node.id);
-                    }}
-                    //FIXME 由contenteditable blur引发的onchange不能生效，因为change node 以后没有刷新。blur之后刷新，ce的值被还原。
-                    //FIXME 重现： 输入汉字，不要标点符号，直接回车。
-                    onBlur={(ev) => {
-                      // this.handleNodeTitleChanged(
-                      //   ev,
-                      //   node,
-                      //   path,
-                      //   //MARK 这里可能要改，innerText可能不等于纯node.text，innerText可能等于text->html之后的那个text。
-                      //   ev.target.value
-                      // );
-                      console.log("in onB handler of ce");
-                      this.handleNodeTextFocus(ev, node.id, false);
-                      // ev.stopPropagation();
-                    }}
-                    innerRef={(en) => (this[`ref-en-${node.id}`] = en)}
-                    onChange={(event) => {
-                      // console.log("on content change");
-                      // console.log(event)
-                      console.log("in onC handler of ce");
-
-                      this.handleNodeTitleChanged(
-                        event,
-                        node,
-                        path,
-                        event.target.value
-                      );
-                    }}
-                  />
+                  //FIXME defaultNodeCell 使用 ContentEditable 组件，有问题，每次键入会render，光标不能保持，一边写，一边光标跑到头上去了。
+                  // (this.props.nodeCell ?? defaultNodeCell)(rowInfo,this)
+                  (this.props.nodeCell ?? defaultNodeCell)(rowInfo,this)
                 ),
                 className: "node-text",
               };
@@ -294,3 +270,5 @@ export class EditableTree extends Component {
     );
   }
 }
+
+export default EditableTree;

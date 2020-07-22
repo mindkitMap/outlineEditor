@@ -1,24 +1,40 @@
 .transform-editor {
   display: flex;
-  height: 5em;
+  height: 1.5em;
+  /* height: 5em; */
+  font-family: PingFang SC Light, Lantinghei SC, Microsoft Yahei,
+    Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
+  font-weight: lighter;
 }
 
 .transform-inputting {
-  font-size: "1em";
-  line-height: "1.2em";
+  /* font-size: "1em"; */
+  /* line-height: "1.2em"; */
   padding: 0;
-  border:0;
+  border: 0;
+  font-family: PingFang SC Light, Lantinghei SC, Microsoft Yahei,
+    Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
+  font-weight: lighter;
   /* width: 20em; */
 }
 .transform-display {
   /* width: 20em; */
+  font-size: "1em";
 }
 
-.transform-inputting .hidden {
+.transform-inputting textarea {
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+}
+
+.transform-inputting,
+.hidden {
   padding: 0px;
   border: 0px;
 }
-.transform-inputting .shown {
+.transform-inputting,
+.shown {
   padding: 2px;
   border: 2px;
 }

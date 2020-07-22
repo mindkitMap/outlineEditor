@@ -76,4 +76,3 @@ export const KeyDown = () => (
            transform={(text) => `--- ${text} ---`}
          />
        );
-export const WithTree =()=> <TransformWithTree/>

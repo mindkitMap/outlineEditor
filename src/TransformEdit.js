@@ -43,6 +43,7 @@ class TransformEdit extends Component {
   }
   focus = () => {
     this.textareaRef.focus();
+    // this.setState({focus:true})
   };
   blur = () => {
     this.textareaRef.blur();
@@ -72,7 +73,7 @@ class TransformEdit extends Component {
             this.props.className,
             "transform-inputting",
             { shown: this.state?.focus },
-            { hidden: !(this.state?.focus ?? true) }
+            { hidden: !(this.state?.focus ?? false) }
           )}
           loadingComponent={Loading}
           style={this.props.style ?? style}
@@ -83,16 +84,16 @@ class TransformEdit extends Component {
           minChar={0}
           trigger={trigger}
           value={this.state.value}
-          onKeyDown={(e) => this.props?.onKeyDown(e)}
+          onKeyDown={(e) => this.props.onKeyDown?.(e)}
           onChange={(e) => this.onEditing(e)}
           onFocus={(e) => this.onFocus(e)}
           onBlur={(e) => this.onBlur(e)}
         />
         <div
           ref={(r) => (this.displayRef = r)}
-          className={cls(
+          className={cls('transform-display',
             { hidden: this.state?.focus },
-            { shown: !(this.state?.focus ?? true) }
+            { shown: !(this.state?.focus ?? false) }
           )}
           dangerouslySetInnerHTML={{ __html: this.transform(this.state.value) }}
         />
@@ -104,6 +105,7 @@ class TransformEdit extends Component {
     onChange: PropTypes.func,
     onBlur: PropTypes.func,
     onFocus: PropTypes.func,
+    onKeyDown: PropTypes.func,
     disabled: PropTypes.bool,
     className: PropTypes.string,
     style: PropTypes.object,
