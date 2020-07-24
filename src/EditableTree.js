@@ -27,9 +27,9 @@ class EditableTree extends Component {
     };
     this.treeRef = React.createRef();
   }
-  fireDataChange(treeData) {
+  fireDataChange(treeData,isComposing=false) {
     // eslint-disable-next-line no-unused-expressions
-    this.props.onChange?.(treeData);
+    this.props.onChange?.({treeData,isComposing});
   }
   selectNodeAsync(id) {
     clearTimeout(this.selectNodeAsyncTimeout);
@@ -101,7 +101,7 @@ class EditableTree extends Component {
       ...this.state,
       treeData: newTree,
     });
-    this.fireDataChange(newTree);
+    this.fireDataChange(newTree,event.nativeEvent?.isComposing );
     // ,0)
   }
   // handleKeyInNodeEditing(event, node, path) {}

@@ -5,6 +5,9 @@
   font-family: PingFang SC Light, Lantinghei SC, Microsoft Yahei,
     Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
   font-weight: lighter;
+  /* margin-top: 8px; */
+   align-items: center;
+  justify-content: center;
 }
 
 .transform-inputting {
@@ -15,11 +18,15 @@
   font-family: PingFang SC Light, Lantinghei SC, Microsoft Yahei,
     Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
   font-weight: lighter;
+  /* margin-right: 2em; */
   /* width: 20em; */
 }
 .transform-display {
   /* width: 20em; */
   font-size: "1em";
+}
+.transform-display.hidden {
+  display: none;
 }
 
 .transform-inputting textarea {
@@ -28,7 +35,13 @@
   font-size: inherit;
 }
 
-.transform-inputting,
+.hidden textarea {
+  border: none;
+}
+/* div.hidden {
+  width: 0px;
+} */
+/* .transform-inputting,
 .hidden {
   padding: 0px;
   border: 0px;
@@ -37,7 +50,7 @@
 .shown {
   padding: 2px;
   border: 2px;
-}
+} */
 
 .hidden {
   width: 0px;
