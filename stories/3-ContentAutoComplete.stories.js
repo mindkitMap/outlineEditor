@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 
-import ContentEditable from '../dist/ContentEditable'
 import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
 import emoji from "@jukben/emoji-search";
 
@@ -62,7 +61,6 @@ class AutoCompleteWithCE extends Component {
             <ReactTextareaAutocomplete
               className="my-textarea"
               loadingComponent={Loading}
-              textAreaComponent = {ContentEditable}
               style={style}
               ref={(rta) => {
                 this.rta = rta;
@@ -85,4 +83,3 @@ export default {
 };
 
 export const Default = () => <AutoComplete />;
-// export const ContentEditableWith=()=> <AutoCompleteWithCE/>

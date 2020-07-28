@@ -8,12 +8,11 @@ import SortableTree, {
 } from "react-sortable-tree";
 import { momentString, uuid } from "./Util";
 
-// import {defaultNodeCell} from "./DefaultNodeCell";
-import {defaultNodeCell} from "./TransformNodeCell";
+import { defaultNodeCell } from "./TransformNodeCell";
 
 import "react-sortable-tree/style.css";
 
-import './spreadsheet.css'
+import "./spreadsheet.css";
 
 // import 'react-sortable-tree/styles.css';
 
@@ -27,9 +26,9 @@ class EditableTree extends Component {
     };
     this.treeRef = React.createRef();
   }
-  fireDataChange(treeData,isComposing=false) {
+  fireDataChange(treeData, isComposing = false) {
     // eslint-disable-next-line no-unused-expressions
-    this.props.onChange?.({treeData,isComposing});
+    this.props.onChange?.({ treeData, isComposing });
   }
   selectNodeAsync(id) {
     clearTimeout(this.selectNodeAsyncTimeout);
@@ -101,7 +100,7 @@ class EditableTree extends Component {
       ...this.state,
       treeData: newTree,
     });
-    this.fireDataChange(newTree,event.nativeEvent?.isComposing );
+    this.fireDataChange(newTree, event.nativeEvent?.isComposing);
     // ,0)
   }
   // handleKeyInNodeEditing(event, node, path) {}
@@ -206,8 +205,8 @@ class EditableTree extends Component {
     if (event.key === "Enter") {
       this.exitEditing();
       //生成兄弟。
-      // setTimeout(() => 
-      this.createLowSibling()
+      // setTimeout(() =>
+      this.createLowSibling();
       // , 0);
     }
     if (event.key === "Tab") {
@@ -251,10 +250,10 @@ class EditableTree extends Component {
               const { node, path } = rowInfo;
               let nodeProps = {
                 onClick: (event) => this.handleNodeClicked(event, rowInfo),
-                title: (
-                  //FIXME defaultNodeCell 使用 ContentEditable 组件，有问题，每次键入会render，光标不能保持，一边写，一边光标跑到头上去了。
-                  // (this.props.nodeCell ?? defaultNodeCell)(rowInfo,this)
-                  (this.props.nodeCell ?? defaultNodeCell)(rowInfo,this)
+                title: (this.props.nodeCell ?? defaultNodeCell)(
+                  rowInfo,
+                  this,
+                  this.props
                 ),
                 className: "node-text",
               };

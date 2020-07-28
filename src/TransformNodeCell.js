@@ -1,17 +1,17 @@
 import React from "react";
 import TransformEdit from "./TransformEdit";
-export const defaultNodeCell = (rowInfo, treeInstance) => {
+export const defaultNodeCell = (rowInfo, treeInstance, props) => {
   const { node, path } = rowInfo;
   return (
     <TransformEdit
+      trigger={props.trigger}
+      transform={props.transform}
       key={`ce-${node.id}`}
       className="node-text"
       value={node.text}
       onFocus={(ev) => {
         treeInstance.handleNodeTextFocus(ev, node.id);
       }}
-      //FIXME 由contenteditable blur引发的onchange不能生效，因为change node 以后没有刷新。blur之后刷新，ce的值被还原。
-      //FIXME 重现： 输入汉字，不要标点符号，直接回车。
       onBlur={(ev) => {
         // this.handleNodeTitleChanged(
         //   ev,

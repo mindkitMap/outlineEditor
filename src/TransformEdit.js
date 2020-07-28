@@ -2,26 +2,16 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
-import emoji from "@jukben/emoji-search";
 
 import "./transform.css";
 import "@webscopeio/react-textarea-autocomplete/style.css";
 
 import cls from "classnames";
 
-const Item = ({ entity: { name, char } }) => <div>{`${name}: ${char}`}</div>;
 const Loading = ({ data }) => <div>Loading</div>;
 
-const trigger = {
-  ":": {
-    dataProvider: (token) => {
-      return emoji(token)
-        .slice(0, 10)
-        .map(({ name, char }) => ({ name, char }));
-    },
-    component: Item,
-    output: (item, trigger) => item.char,
-  },
+const defaultTrigger = {
+ 
 };
 
 const style = {
@@ -49,7 +39,7 @@ class TransformEdit extends Component {
     this.textareaRef.blur();
   };
   transform = (inputtedHtml) => {
-    const fun = this.props.transform ?? ((v) => v);
+    const fun = this.props.transform ?? defaultTransform();
     return fun(inputtedHtml);
   };
   onEditing = (e) => {
@@ -82,7 +72,7 @@ class TransformEdit extends Component {
           }}
           containerStyle={containerStyle}
           minChar={0}
-          trigger={trigger}
+          trigger={this.props.trigger ?? defaultTrigger}
           value={this.state.value}
           onKeyDown={(e) => this.props.onKeyDown?.(e)}
           onChange={(e) => this.onEditing(e)}
@@ -114,3 +104,7 @@ class TransformEdit extends Component {
 }
 
 export default TransformEdit;
+function defaultTransform() {
+  return ((v) => v);
+}
+

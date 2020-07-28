@@ -3,7 +3,6 @@ import TransformEdit from "../dist/TransformEdit";
 
 import { action } from "@storybook/addon-actions";
 
-import TransformWithTree from './TransformWithTree'
 
 
 export default {
