@@ -76,8 +76,8 @@ react 技术栈。
 | onChange |                   | 可选。(event)=>void，事件监听，当内容变动时触发。 |
 |  | event.target.value | TreeNode[]，大纲内容，结构同输入props.value |
 |  | event.isComposing | boolean，中文输入法的键入引起的事件，来源于onInput事件的isComposing。 https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/isComposing （在很多只关心内容，不关心操作过程的事件逻辑中，你可能需要过滤掉`isComposing===true`的事件。） |
-| trigger |  | 可选。定义自动完成的属性，本属性直接传递给react-textarea-autocomplete ，其具体结构见 - https://github.com/webscopeio/react-textarea-autocomplete#trigger-type，缺省为空，即不定义任何自动完成行为。 |
-| transform |  | 可选。(string)=>string，转换函数。传入编辑时文本，传出展示时文本。这个功能可以让内容具备交互能力。比如编辑时`[[MindKit]]`可以转换为展示时`<a href='...#word=MindKit'>MindKit</a>`。缺省为不做任何转换。 |
+| trigger |  | 可选。定义自动完成的属性，本属性直接传递给react-textarea-autocomplete ，其具体结构见 - https://github.com/webscopeio/react-textarea-autocomplete#trigger-type， 缺省为空，即不定义任何自动完成行为。可以在`./stories/trigger.js`中找到例子。 |
+| transform |  | 可选。(string)=>string，转换函数。传入编辑时文本，传出展示时文本。这个功能可以让内容具备交互能力。比如编辑时`[[MindKit]]`可以转换为展示时`<a href='...#word=MindKit'>MindKit</a>`。缺省为不做任何转换。可以在`./stories/transform.js`中找到例子。 |
 
 
 
