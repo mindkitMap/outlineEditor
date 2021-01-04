@@ -34,7 +34,7 @@ const containerStyle = {
 };
 class AutoComplete extends Component {
   render() {
-    return (
+    return (<>
       <div className="App">
         <ReactTextareaAutocomplete
           className="my-textarea"
@@ -51,6 +51,10 @@ class AutoComplete extends Component {
           trigger={trigger}
         />
       </div>
+      <div>
+        input ':' to trigger a autocomplete option list.
+      </div>
+      </>
     );
   }
 }

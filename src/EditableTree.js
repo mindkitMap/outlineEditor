@@ -28,7 +28,13 @@ class EditableTree extends Component {
   }
   fireDataChange(treeData, isComposing = false) {
     // eslint-disable-next-line no-unused-expressions
-    this.props.onChange?.({ treeData, isComposing });
+    this.props.onChange?.({
+      treeData,
+      isComposing,
+    });
+  }
+  fireSelected(id) {
+    this.props.onSelected?.({ id, node: this.findById(id) });
   }
   selectNodeAsync(id) {
     clearTimeout(this.selectNodeAsyncTimeout);
@@ -36,6 +42,7 @@ class EditableTree extends Component {
   }
   selectNode(id) {
     this.setState({ ...this.state, selectedNodeId: id });
+    this.fireSelected(id);
   }
   focusSelectedNode() {
     const ref = this[`ref-en-${this.state.selectedNodeId}`];
@@ -66,8 +73,9 @@ class EditableTree extends Component {
       getNodeKey: this.getNodeKey,
       expandParent: true,
     });
+    this.fireDataChange(re.treeData, false);
     this.setState({ ...this.state, treeData: re.treeData });
-    this.fireDataChange(re.treeData);
+
     this.selectNodeAsync(thisNode.id);
   }
 
@@ -138,17 +146,17 @@ class EditableTree extends Component {
       getNodeKey: this.getNodeKey,
     });
     this.setState({ ...this.state, treeData: re.treeData });
-    this.fireDataChange(re.treeData);
+    this.fireDataChange(re.treeData, false);
 
     this.selectNodeAsync(id);
   }
   findById(nodeId) {
     const re = find({
       treeData: this.state.treeData,
-      searchMethod: (node) => node.id === nodeId,
+      searchMethod: (data) => data.node.id === nodeId,
       getNodeKey: this.getNodeKey,
     });
-    // console.log(re);
+    console.log(re);
     return re?.matches?.[0]?.node;
   }
   gotoSelectDelta(delta = 1) {
