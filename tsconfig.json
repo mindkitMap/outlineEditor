@@ -11,7 +11,7 @@
     "noImplicitAny": false,
     "declaration": true,
     "moduleResolution": "node",
-    "module": "esnext",
+    "module": "CommonJS",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowJs": true,

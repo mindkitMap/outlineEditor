@@ -21,7 +21,7 @@ export const WithFinalForm = () => (
     {({ handleSubmit }) => (
       <form onSubmit={handleSubmit}>
         <button type="submit">Submit!</button>
-
+        <Field name='text' component='input'/>
         <Field name="tree">
           {({ input }) => (
             <EditableTree

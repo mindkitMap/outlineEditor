@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, cloneElement, createElement } from "react";
 import PropTypes from "prop-types";
 
 import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
@@ -10,9 +10,7 @@ import cls from "classnames";
 
 const Loading = ({ data }) => <div>Loading</div>;
 
-const defaultTrigger = {
- 
-};
+const defaultTrigger = {};
 
 const style = {
   fontSize: "1em",
@@ -43,7 +41,8 @@ class TransformEdit extends Component {
     return fun(inputtedHtml);
   };
   onEditing = (e) => {
-    this.displayRef?.innerHTML = this.transform(e.target.value);
+    // this.displayRef?.innerHTML = this.transform(e.target.value);
+
     this.setState({ value: e.target.value });
     this.props.onChange?.(e);
   };
@@ -55,39 +54,50 @@ class TransformEdit extends Component {
     this.props.onBlur?.(e);
     this.setState({ focus: false });
   };
+
   render() {
+    const transformed = this.transform(this.state.value);
+    // console.log(transformed);
     return (
-      <div className="transform-editor">
-        <ReactTextareaAutocomplete
-          containerClassName={cls(
-            this.props.className,
-            "transform-inputting",
-            { shown: this.state?.focus },
-            { hidden: !(this.state?.focus ?? false) }
-          )}
-          loadingComponent={Loading}
-          style={this.props.style ?? style}
-          innerRef={(textarea) => {
-            this.textareaRef = textarea;
-          }}
-          containerStyle={containerStyle}
-          minChar={0}
-          trigger={this.props.trigger ?? defaultTrigger}
-          value={this.state.value}
-          onKeyDown={(e) => this.props.onKeyDown?.(e)}
-          onChange={(e) => this.onEditing(e)}
-          onFocus={(e) => this.onFocus(e)}
-          onBlur={(e) => this.onBlur(e)}
-        />
-        <div
-          ref={(r) => (this.displayRef = r)}
-          className={cls('transform-display',
-            { hidden: this.state?.focus },
-            { shown: !(this.state?.focus ?? false) }
-          )}
-          dangerouslySetInnerHTML={{ __html: this.transform(this.state.value) }}
-        />
-      </div>
+      <div
+        className="transform-editor"
+        children={[
+          <ReactTextareaAutocomplete
+            containerClassName={cls(
+              this.props.className,
+              "transform-inputting",
+              { shown: this.state?.focus },
+              { hidden: !(this.state?.focus ?? false) }
+            )}
+            loadingComponent={Loading}
+            style={this.props.style ?? style}
+            innerRef={(textarea) => {
+              this.textareaRef = textarea;
+            }}
+            containerStyle={containerStyle}
+            minChar={0}
+            trigger={this.props.trigger ?? defaultTrigger}
+            value={this.state.value}
+            onKeyDown={(e) => this.props.onKeyDown?.(e)}
+            onChange={(e) => this.onEditing(e)}
+            onFocus={(e) => this.onFocus(e)}
+            onBlur={(e) => this.onBlur(e)}
+          />,
+
+          createElement(
+            "div",
+            {
+              ref: (r) => (this.displayRef = r),
+              className: cls(
+                "transform-display",
+                { hidden: this.state?.focus },
+                { shown: !(this.state?.focus ?? false) }
+              ),
+            },
+            createElement("div", {}, transformed)
+          ),
+        ]}
+      ></div>
     );
   }
   static propTypes = {
@@ -105,6 +115,5 @@ class TransformEdit extends Component {
 
 export default TransformEdit;
 function defaultTransform() {
-  return ((v) => v);
+  return (v) => v;
 }
-
