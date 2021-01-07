@@ -2,11 +2,11 @@ import { wrap } from "lodash";
 
 interface TransformResult {
   append(result: TransformResult): TransformResult;
-//   new(input:string):TransformResult
+  //   new(input:string):TransformResult
 }
 export class StringTransformResult implements TransformResult {
   constructor(public raw: string) {}
-  
+
   append(result: TransformResult): TransformResult {
     if (result instanceof StringTransformResult) {
       return new StringTransformResult(this.raw + result.raw);
@@ -14,7 +14,6 @@ export class StringTransformResult implements TransformResult {
     fail("only string transform result supported");
   }
 }
-
 
 interface Transformer {
   regexp: RegExp;
@@ -25,7 +24,11 @@ const tagTransformer: Transformer = {
   regexp: /(\s+?|^)#(\S+?)(\s+|$)/,
   fun: (matchResult) => {
     return new StringTransformResult(
-      matchResult[1] + "--" + matchResult[2] + "--" + matchResult[3]
+      matchResult[1] +
+        "--<button>" +
+        matchResult[2] +
+        "</button>--" +
+        matchResult[3]
     );
   },
 };
@@ -33,7 +36,11 @@ const topicTransformer: Transformer = {
   regexp: /(\s+?|^)\[\[(.+)\]\](\s+|$)/,
   fun: (matchResult) => {
     return new StringTransformResult(
-      matchResult[1] + "((" + matchResult[2] + "))" + matchResult[3]
+      matchResult[1] +
+        "((<button data-event=true>" +
+        matchResult[2] +
+        "</button>))" +
+        matchResult[3]
     );
   },
 };
@@ -42,7 +49,7 @@ export function transformF(
   input: string,
   transformer: Transformer
 ): TransformResult {
-  let result : TransformResult = new StringTransformResult("");
+  let result: TransformResult = new StringTransformResult("");
   const matchResult = input.match(transformer.regexp);
   if (matchResult) {
     //   console.log(matchResult)
@@ -63,6 +70,9 @@ export function transformF(
 }
 
 export function transform(input: string) {
-  return transformF((transformF(input, tagTransformer) as StringTransformResult).raw, topicTransformer);
+  return transformF(
+    (transformF(input, tagTransformer) as StringTransformResult).raw,
+    topicTransformer
+  );
   // return transformF(input,topicTransformer)
 }

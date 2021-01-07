@@ -4,7 +4,7 @@ import EditableTree from "../dist/EditableTree";
 import { action } from "@storybook/addon-actions";
 import { data } from "./data";
 import { trigger } from "./trigger";
-import { transform, tagTransform } from "./transform";
+import {  tagTransform,tagWithEventTransform } from "./transform";
 import { flatDataFromTree, toSimpleNode } from "../dist/ModelHelper";
 export default {
   title: "EditableTree",
@@ -24,7 +24,7 @@ export const Default = () => (
     onChange={actionOnChange}
     onSelected={(ev) => action("selectNode")(ev)}
     trigger={trigger}
-    transform={transform}
+    transform={tagTransform}
   />
 );
 export const WithRichTransform = () => (
@@ -41,7 +41,7 @@ export const WithDynamicEvent = () => (
     value={data}
     onChange={actionOnChange}
     onSelected={(ev) => action("selectNode")(ev)}
-    onClick={action}
+    onClick={(ev) => console.log("in onClick")}
     trigger={trigger}
     transform={tagWithEventTransform}
   />

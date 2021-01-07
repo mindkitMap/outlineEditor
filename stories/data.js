@@ -5,7 +5,7 @@ export const data= [
         },
         {
           id: "b002",
-          text: "Regional Manager",
+          text: "Regional Manager [[topic]]",
           expanded: true,
           children: [
             {

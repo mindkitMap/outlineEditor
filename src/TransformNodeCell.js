@@ -9,6 +9,7 @@ export const defaultNodeCell = (rowInfo, treeInstance, props) => {
       key={`ce-${node.id}`}
       className="node-text"
       value={node.text}
+     
       onFocus={(ev) => {
         treeInstance.handleNodeTextFocus(ev, node.id);
       }}
@@ -27,7 +28,7 @@ export const defaultNodeCell = (rowInfo, treeInstance, props) => {
       onChange={(event) => {
         // console.log("on content change");
         // console.log(event)
-        console.log("in onC handler of ce");
+        // console.log("in onC handler of ce");
 
         treeInstance.handleNodeTitleChanged(
           event,

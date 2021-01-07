@@ -57,6 +57,8 @@ class TransformEdit extends Component {
 
   render() {
     const transformed = this.transform(this.state.value);
+    // const debugging = true;
+    const debugging = false;
     // console.log(transformed);
     return (
       <div
@@ -66,8 +68,12 @@ class TransformEdit extends Component {
             containerClassName={cls(
               this.props.className,
               "transform-inputting",
-              { shown: this.state?.focus },
-              { hidden: !(this.state?.focus ?? false) }
+              debugging
+                ? {}
+                : {
+                    shown: this.state?.focus,
+                    hidden: !(this.state?.focus ?? false),
+                  }
             )}
             loadingComponent={Loading}
             style={this.props.style ?? style}
@@ -87,14 +93,19 @@ class TransformEdit extends Component {
           createElement(
             "div",
             {
-              ref: (r) => (this.displayRef = r),
+              // ref: (r) => (this.displayRef = r),
               className: cls(
                 "transform-display",
-                { hidden: this.state?.focus },
-                { shown: !(this.state?.focus ?? false) }
+                debugging
+                  ? {}
+                  : {
+                      hidden: this.state?.focus,
+                      shown: !(this.state?.focus ?? false),
+                    }
               ),
             },
             createElement("div", {}, transformed)
+            // createElement('div',{dangerouslySetInnerHTML:{__html:transformed.raw}})
           ),
         ]}
       ></div>

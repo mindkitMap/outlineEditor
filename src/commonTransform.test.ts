@@ -31,4 +31,3 @@ test("with topic transform", () => {
   expect(re2.raw).toEqual("123 ((baba))  --kaka-- --这个月-- 123");
 });
 
-export {};

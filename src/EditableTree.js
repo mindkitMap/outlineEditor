@@ -33,6 +33,10 @@ class EditableTree extends Component {
       isComposing,
     });
   }
+  fireClicked(ev){
+    console.log('in fire clicked')
+    this.props.onClick?.(ev)
+  }
   fireSelected(id) {
     this.props.onSelected?.({ id, node: this.findById(id) });
   }
@@ -78,8 +82,17 @@ class EditableTree extends Component {
 
     this.selectNodeAsync(thisNode.id);
   }
+  // handleClick(ev,node){
+  //   console.log("in handel  clicked");
 
+  // }
   handleNodeClicked(event, rowInfo) {
+    console.log('in handel node clicked')
+    console.log(event.target)
+    console.log(event.target.attributes)
+    if(event.target.attributes['data-event']){
+      this.fireClicked(event)
+    }
     if (
       event.target.className.includes("collapseButton") ||
       event.target.className.includes("expandButton")
@@ -156,7 +169,7 @@ class EditableTree extends Component {
       searchMethod: (data) => data.node.id === nodeId,
       getNodeKey: this.getNodeKey,
     });
-    console.log(re);
+    // console.log(re);
     return re?.matches?.[0]?.node;
   }
   gotoSelectDelta(delta = 1) {
