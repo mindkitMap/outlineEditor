@@ -6,6 +6,7 @@ import { data } from "./data";
 import { trigger } from "./trigger";
 import {  tagTransform,tagWithEventTransform } from "./transform";
 import { flatDataFromTree, toSimpleNode } from "../dist/ModelHelper";
+import { version } from "final-form";
 export default {
   title: "EditableTree",
   component: EditableTree,
@@ -22,7 +23,7 @@ export const Default = () => (
   <EditableTree
     value={data}
     onChange={actionOnChange}
-    onSelected={(ev) => action("selectNode")(ev)}
+    onSelected={action("selectNode")}
     trigger={trigger}
     transform={tagTransform}
   />
@@ -31,7 +32,7 @@ export const WithRichTransform = () => (
   <EditableTree
     value={data}
     onChange={actionOnChange}
-    onSelected={(ev) => action("selectNode")(ev)}
+    onSelected={action("selectNode")}
     trigger={trigger}
     transform={tagTransform}
   />
@@ -40,9 +41,10 @@ export const WithDynamicEvent = () => (
   <EditableTree
     value={data}
     onChange={actionOnChange}
-    onSelected={(ev) => action("selectNode")(ev)}
-    onClick={(ev) => console.log("in onClick")}
+    onSelected={action("selectNode")}
+    onClick={action('clickedNestComponent')}
     trigger={trigger}
     transform={tagWithEventTransform}
   />
 );
+

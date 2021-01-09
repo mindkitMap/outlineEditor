@@ -34,7 +34,7 @@ class EditableTree extends Component {
     });
   }
   fireClicked(ev){
-    console.log('in fire clicked')
+    // console.log('in fire clicked')
     this.props.onClick?.(ev)
   }
   fireSelected(id) {
@@ -45,6 +45,7 @@ class EditableTree extends Component {
     this.selectNodeAsyncTimeout = setTimeout(() => this.selectNode(id), 0);
   }
   selectNode(id) {
+    //TODO 增加重复选择判断？
     this.setState({ ...this.state, selectedNodeId: id });
     this.fireSelected(id);
   }
@@ -87,9 +88,9 @@ class EditableTree extends Component {
 
   // }
   handleNodeClicked(event, rowInfo) {
-    console.log('in handel node clicked')
-    console.log(event.target)
-    console.log(event.target.attributes)
+    // console.log('in handel node clicked')
+    // console.log(event.target)
+    // console.log(event.target.attributes)
     if(event.target.attributes['data-event']){
       this.fireClicked(event)
     }
@@ -107,7 +108,7 @@ class EditableTree extends Component {
     // console.log(path)
     // console.log(newValue)
     // console.log(this.rowInfo.path)
-    console.log("in tree change handle - " + newValue);
+    // console.log("in tree change handle - " + newValue);
     const newNode = { ...node, text: newValue };
     const newTree = changeNodeAtPath({
       treeData: this.state.treeData,
@@ -115,7 +116,7 @@ class EditableTree extends Component {
       newNode,
       getNodeKey: this.getNodeKey,
     });
-    console.log(newTree);
+    // console.log(newTree);
     // setTimeout(()=>
     this.setState({
       ...this.state,
