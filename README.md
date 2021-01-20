@@ -51,7 +51,7 @@ react 技术栈。
 | 上、下方向     | 变化选中的节点，本节点退出编辑状态，编辑生效                 | 变化选中的节点                                               |
 | 空格           | 输入空格符                                                   | 进入编辑中状态                                               |
 | esc            | 退出编辑状态，编辑生效                                       |                                                              |
-| enter          | 退出编辑状态，编辑生效。生成新节点，位于本节点之下，与本节点同级。 | 生成新节点，位于本节点之下，同本节点同级。                   |
+| enter          | 退出编辑状态，编辑生效。生成新节点，位于本节点之下，与本节点同级。如果当时编辑位置不在文本末尾，节点将从编辑位置处分开，后面的文本出现在新节点上。 | 生成新节点，位于本节点之下，同本节点同级。                   |
 | tab、shift+tab | 变化本节点的级别，tab为缩进，即级别+1。shift+tab为反缩进，级别-1。 | 变化本节点的级别，tab为缩进，即级别+1。shift+tab为反缩进，级别-1。 |
 ### 鼠标操作
 | 鼠标操作               | 编辑中状态                                 | 未在编辑中                           |
@@ -76,6 +76,10 @@ react 技术栈。
 | onChange |                   | 可选。(event)=>void，事件监听，当内容变动时触发。 |
 |  | event.treeData | TreeNode[]，大纲内容，结构同输入props.value |
 |  | event.isComposing | boolean，中文输入法的键入引起的事件，来源于onInput事件的isComposing。 https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/isComposing （在很多只关心内容，不关心操作过程的事件逻辑中，你可能需要过滤掉`isComposing===true`的事件。） |
+| onSelected |  | 可选。(event)=>void，事件监听，当节点被选中时触发。 |
+|  | event.id | TreeNode.id，被选中的节点id。暂不支持多选。TODO |
+| onClick |  | 可选。(event)=>void，事件监听，当节点被点击时触发。可能主要用于对节点内部UI部件的响应。注意，需要在UI部件上加上”data-event“属性，才会被onClick触发。比如在transform里面变换出：`<button data-event=true data-uri=${uri}>${text}</button>`。stories里面有个demo。 |
+|  | event | 直接传出react默认的event。也就是说，可以用event.target.attributes["xxxx"]来获得相关信息。 |
 | trigger |  | 可选。定义自动完成的属性，本属性直接传递给react-textarea-autocomplete ，其具体结构见 - https://github.com/webscopeio/react-textarea-autocomplete#trigger-type， 缺省为空，即不定义任何自动完成行为。可以在`./stories/trigger.js`中找到例子。 |
 | transform |  | 可选。(string)=>string，转换函数。传入编辑时文本，传出展示时文本。这个功能可以让内容具备交互能力。比如编辑时`[[MindKit]]`可以转换为展示时`<a href='...#word=MindKit'>MindKit</a>`。缺省为不做任何转换。可以在`./stories/transform.js`中找到例子。 |
 | transform3Model | | 可选。使用3Model机制。一个更加完备的转换系统，具体设计思想见下面的说明。当本属性被设置时优先级高于transform属性。单独设置transform属性可以视为本属性的一个简写。具体可见源代码src/Transform3Model.ts |
@@ -97,7 +101,7 @@ react 技术栈。
 
    
 
-比如在常见的大纲编辑中，[[xxx]]被解析唯一个topic链接。此时，对于业务模型，可以在text中保留文本，而在attributes中放入topic的链接目标等信息。
+比如在常见的大纲编辑中，**[[xxx]]** 被解析唯一个topic链接。此时，对于业务模型，可以在text中保留文本，而在attributes中放入topic的链接目标等信息。
 
 ```yaml
 id: 'xxxxx'
@@ -129,6 +133,8 @@ attributes:
 
 1. 多行或者变高度的node没有实现。
 4. 嵌入网页等复杂内容，也严重依赖于变高度的node。
+3. 节点多选。
+4. Undo/Redo
 5. 子树级别使用3model。支持定制展示和编辑。比如，某个节点及其子节点以**看板**、**表格**等特殊形式展示和编辑，此时对这个节点如何使用3model？
 6. 需要大量测试和debug。目前测试很有限。
 

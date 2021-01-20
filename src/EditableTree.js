@@ -8,24 +8,24 @@ import SortableTree, {
   map,
 } from "react-sortable-tree";
 import { momentString, uuid, deepMerge } from "./Util";
-
 import { defaultNodeCell } from "./TransformNodeCell";
-
 import "react-sortable-tree/style.css";
-
 import "./spreadsheet.css";
+
+function translateToModelNode(node) {
+  return deepMerge(node, { attributes: { view: { expanded: node.expanded } } });
+}
 
 function translateToModel(treeData) {
   return map({
     treeData,
     getNodeKey,
-    callback: ({ node }) =>
-      deepMerge(node, { attributes: { view: { expanded: node.expanded } } }),
+    callback: ({ node }) => translateToModelNode(node),
     ignoreCollapsed: false,
   });
 }
 function translateToTreeModel(model) {
-  console.log("model", model);
+  // console.log("model", model);
   const re = map({
     treeData: model,
     getNodeKey,
@@ -33,7 +33,7 @@ function translateToTreeModel(model) {
       deepMerge(node, { expanded: node.attributes?.view?.expanded }),
     ignoreCollapsed: false,
   });
-  console.log("re", re);
+  // console.log("re", re);
   return re;
 }
 function getNodeKey({ node }) {
@@ -67,7 +67,7 @@ class EditableTree extends Component {
     this.props.onClick?.(ev);
   }
   fireSelected(id) {
-    this.props.onSelected?.({ id, node: this.findById(id) });
+    this.props.onSelected?.({ id });
   }
   selectNodeAsync(id) {
     clearTimeout(this.selectNodeAsyncTimeout);
