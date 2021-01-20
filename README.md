@@ -103,11 +103,11 @@ react 技术栈。
 id: 'xxxxx'
 text: 'cost 1 hour on this [[some topic]]'
 attributes: 
-	links: 
-		- text: 'some topic'
-			target: 'topic:someTopic'
-	view:
-		expanded: true
+    links: 
+        -   text: 'some topic'
+            target: 'topic:someTopic'
+    view:
+        expanded: true
 ```
 
 对于展示模型，UI展示'cost 1 hour on this [[some topic]]'，其中[[some topic]] 是一个可以点击的button（或者其他可操作的UI部件）。
