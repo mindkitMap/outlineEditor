@@ -33,7 +33,7 @@ react 技术栈。
 3. 当树节点获得焦点时，转换到可编辑状态，节点内容可以编辑，变化以`onChange`事件传出。其结构约定如“参考”一节。
 4. 自动完成。自定制，以trigger属性传入。其结构约定如“参考”一节。
 5. 当退出可编辑状态，节点内容可以做一个转换，作为节点展示用，这个功能可以让内容具备交互能力。比如`[[MindKit]]`转换为`<a href='...#word=MindKit'>MindKit</a>`。这个转换的转换函数由transform/transform3Model属性传入。如“参考”一节详述。
-   1. 转换后文本仅作为展示用，不会影响编辑时文本，即value和onChange的内容不会被影响。
+   1. 转换后文本仅作为展示用，不会影响编辑时文本，即onChange传出的数据内容不会被影响。
 
 
 
@@ -78,7 +78,7 @@ react 技术栈。
 |  | event.isComposing | boolean，中文输入法的键入引起的事件，来源于onInput事件的isComposing。 https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/isComposing （在很多只关心内容，不关心操作过程的事件逻辑中，你可能需要过滤掉`isComposing===true`的事件。） |
 | trigger |  | 可选。定义自动完成的属性，本属性直接传递给react-textarea-autocomplete ，其具体结构见 - https://github.com/webscopeio/react-textarea-autocomplete#trigger-type， 缺省为空，即不定义任何自动完成行为。可以在`./stories/trigger.js`中找到例子。 |
 | transform |  | 可选。(string)=>string，转换函数。传入编辑时文本，传出展示时文本。这个功能可以让内容具备交互能力。比如编辑时`[[MindKit]]`可以转换为展示时`<a href='...#word=MindKit'>MindKit</a>`。缺省为不做任何转换。可以在`./stories/transform.js`中找到例子。 |
-| transform3Model | | 使用3Model机制。一个更加完备的转换系统，具体设计思想见下面的说明。当本属性被设置时优先级高于transform属性。单独设置transform属性可以视为本属性的一个简写。具体可见源代码src/Transform3Model.ts |
+| transform3Model | | 可选。使用3Model机制。一个更加完备的转换系统，具体设计思想见下面的说明。当本属性被设置时优先级高于transform属性。单独设置transform属性可以视为本属性的一个简写。具体可见源代码src/Transform3Model.ts |
 |  | toInputting | 从model转换到inputting model |
 |  | fromInputting | 从inputting model转换到model |
 |  | toView | 从model转换到view model |
@@ -93,7 +93,7 @@ react 技术栈。
 
 2. 展示模型用于**未在编辑**状态，用于支持内容的展示和简单的交互，比如点击某些特殊内容。
 
-3. 业务模型是树所完成的业务。即大纲编辑。
+3. 业务模型是树所完成的业务。即大纲编辑。树与外部交互的数据是业务模型。比如value传入和onChange传出。
 
    
 
@@ -127,8 +127,8 @@ attributes:
 
 ## 路线图/需要帮助
 
-1. 多行或者变高度的node没有考虑。
-4. 嵌入网页等复杂内容。
-5. 子树级别使用3model。支持定制展示和编辑。比如，某个节点及其子节点以看板展示和编辑，此时对这个节点如何使用3model？
+1. 多行或者变高度的node没有实现。
+4. 嵌入网页等复杂内容，也严重依赖于变高度的node。
+5. 子树级别使用3model。支持定制展示和编辑。比如，某个节点及其子节点以**看板**、**表格**等特殊形式展示和编辑，此时对这个节点如何使用3model？
 6. 需要大量测试和debug。目前测试很有限。
 
