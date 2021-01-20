@@ -21,7 +21,7 @@ class FocusContainer extends Component<ContainerProps> {
     clearTimeout(this._timeoutID);
     if (!this.isManagingFocus) {
       this.isManagingFocus = true;
-    //   console.log("isManagingFocus - " + this.isManagingFocus);
+      //   console.log("isManagingFocus - " + this.isManagingFocus);
       this.props.onFocus?.(e);
     }
   };

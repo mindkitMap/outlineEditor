@@ -1,73 +1,69 @@
-/**
- * TODO 
- * transformer 有两个， 一个是inputing to model，一个是 model to view
- * 
- */
-interface TransformResult {
-  append(result: TransformResult): TransformResult;
-  //   new(input:string):TransformResult
+interface ViewModel {
+  append(result: ViewModel): ViewModel;
+  //   new(input:string): ViewModel
 }
-export class StringTransformResult implements TransformResult {
+export class StringViewModel implements ViewModel {
   constructor(public raw: string) {}
 
-  append(result: TransformResult): TransformResult {
-    if (result instanceof StringTransformResult) {
-      return new StringTransformResult(this.raw + result.raw);
+  append(result: ViewModel): ViewModel {
+    if (result instanceof StringViewModel) {
+      return new StringViewModel(this.raw + result.raw);
     }
     fail("only string transform result supported");
   }
 }
 
-interface Transformer {
+export interface Transformer {
   regexp: RegExp;
-  fun(input: RegExpMatchArray): TransformResult;
+  fun(input: RegExpMatchArray): ViewModel;
 }
 
-const tagTransformer: Transformer = {
+export const tagTransformer: Transformer = {
   regexp: /(\s+?|^)#(\S+?)(\s+|$)/,
   fun: (matchResult) => {
-    return new StringTransformResult(
-      `${matchResult[1]}--${wrap(matchResult[2])}--${matchResult[3]}`
+     return new StringViewModel(
+       `${matchResult[1]}${wrap(
+         `#${matchResult[2]}`
+         )}${matchResult[3]}`
+     );
+  },
+};
+
+export const topicTransformer: Transformer = {
+  regexp: /(\s+?|^)\[\[(\S+?)\]\](\s+|$)/,
+  fun: (matchResult) => {
+    return new StringViewModel(
+      `${matchResult[1]}${wrap(
+        `[[${matchResult[2]}]]`
+        )}${matchResult[3]}`
     );
   },
 };
-const tagTestTransformer: Transformer = {
-  regexp: /(\s+?|^)#(\S+?)(\s+|$)/,
+
+export const refTransformer: Transformer = {
+  regexp: /(\s+?|^)\(\((\S+?)\)\)(\s+|$)/,
   fun: (matchResult) => {
-    return new StringTransformResult(
-      `${matchResult[1]}--${matchResult[2]}--${matchResult[3]}`
-    );
-  },
-};
-const topicTransformer: Transformer = {
-  regexp: /(\s+?|^)\[\[(.+)\]\](\s+|$)/,
-  fun: (matchResult) => {
-    return new StringTransformResult(
-      `${matchResult[1]}((${wrap(matchResult[2])}))${matchResult[3]}`
+    return new StringViewModel(
+      `${matchResult[1]}${wrap(
+        `((${matchResult[2]}))`
+        )}${matchResult[3]}`
     );
   },
 };
 function wrap(text: string, uri: string = "") {
   return `<button data-event=true data-uri=${uri}>${text}</button>`;
 }
-const topicTestTransformer: Transformer = {
-  regexp: /(\s+?|^)\[\[(.+)\]\](\s+|$)/,
-  fun: (matchResult) => {
-    return new StringTransformResult(
-      `${matchResult[1]}((${matchResult[2]}))${matchResult[3]}`
-    );
-  },
-};
+
 
 export function transformForTransformer(
   input: string,
   transformer: Transformer
-): TransformResult {
-  let result: TransformResult = new StringTransformResult("");
+): ViewModel {
+  let result: ViewModel = new StringViewModel("");
   const matchResult = input.match(transformer.regexp);
   if (matchResult) {
     result = result
-      .append(new StringTransformResult(input.substr(0, matchResult.index)))
+      .append(new StringViewModel(input.substr(0, matchResult.index)))
       .append(transformer.fun(matchResult))
       .append(
         transformForTransformer(
@@ -76,18 +72,19 @@ export function transformForTransformer(
         )
       );
   } else {
-    result = new StringTransformResult(input);
+    result = new StringViewModel(input);
   }
   return result;
 }
 
-export function transform(input: string,transformers:Transformer[]= [tagTransformer, topicTransformer]) {
+export function transform(
+  input: string,
+  transformers: Transformer[]
+) {
   let re = input;
   transformers.forEach((tran) => {
-    re = (transformForTransformer(re, tran) as StringTransformResult).raw;
+    re = (transformForTransformer(re, tran) as StringViewModel).raw;
   });
   return re;
 }
-export function testTransform(input: string) {
-  return transform(input,[tagTestTransformer,topicTestTransformer])
-}
+

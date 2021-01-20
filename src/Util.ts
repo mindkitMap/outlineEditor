@@ -1,5 +1,7 @@
 import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
+import mergeOptions from "merge-options";
+
 
 export function momentString(): string {
   return moment().format("HH:mm:ss");
@@ -18,4 +20,9 @@ export function equalsStringArray(a: string[], b: string[]): boolean {
     }
   }
   return true;
+}
+
+
+export function deepMerge<T>(obj: T, source: any): T {
+  return mergeOptions.call({ concatArrays: true }, obj, source) as T;
 }
