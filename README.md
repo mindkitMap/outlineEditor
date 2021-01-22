@@ -2,7 +2,7 @@
 
 大纲编辑器。
 
-以树形结构展示文本为主的层级内容。
+以树形结构编辑和展示文本为主的层级内容。
 
 类似于幕布，workflowy，roamResearch，roamEdit等大纲类笔记所用。
 
@@ -77,17 +77,33 @@ react 技术栈。
 |  | event.treeData | TreeNode[]，大纲内容，结构同输入props.value |
 |  | event.isComposing | boolean，中文输入法的键入引起的事件，来源于onInput事件的isComposing。 https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/isComposing （在很多只关心内容，不关心操作过程的事件逻辑中，你可能需要过滤掉`isComposing===true`的事件。） |
 | onSelected |  | 可选。(event)=>void，事件监听，当节点被选中时触发。 |
-|  | event.id | TreeNode.id，被选中的节点id。暂不支持多选。TODO |
+|  | event.id | TreeNode.id，被选中的节点id。（暂不支持多选及相关的批量操作。TODO） |
 | onClick |  | 可选。(event)=>void，事件监听，当节点被点击时触发。可能主要用于对节点内部UI部件的响应。注意，需要在UI部件上加上”data-event“属性，才会被onClick触发。比如在transform里面变换出：`<button data-event=true data-uri=${uri}>${text}</button>`。stories里面有个demo。 |
 |  | event | 直接传出react默认的event。也就是说，可以用event.target.attributes["xxxx"]来获得相关信息。 |
 | trigger |  | 可选。定义自动完成的属性，本属性直接传递给react-textarea-autocomplete ，其具体结构见 - https://github.com/webscopeio/react-textarea-autocomplete#trigger-type， 缺省为空，即不定义任何自动完成行为。可以在`./stories/trigger.js`中找到例子。 |
-| transform |  | 可选。(string)=>string，转换函数。传入编辑时文本，传出展示时文本。这个功能可以让内容具备交互能力。比如编辑时`[[MindKit]]`可以转换为展示时`<a href='...#word=MindKit'>MindKit</a>`。缺省为不做任何转换。可以在`./stories/transform.js`中找到例子。 |
-| transform3Model | | 可选。使用3Model机制。一个更加完备的转换系统，具体设计思想见下面的说明。当本属性被设置时优先级高于transform属性。单独设置transform属性可以视为本属性的一个简写。具体可见源代码src/Transform3Model.ts |
-|  | toInputting | 从model转换到inputting model |
-|  | fromInputting | 从inputting model转换到model |
-|  | toView | 从model转换到view model |
+| transform |  | 可选。(inputting:string)=>string，转换函数。传入编辑时文本，传出展示时文本。这个功能可以让内容具备交互能力。下面的章节有进一步的解释。 |
+|  | inputting | 输入的文本内容 |
+|  | （返回） | 展示时的html。比如编辑时`[[MindKit]]`可以转换为展示时`<a href='...#word=MindKit'>MindKit</a>`。 |
+| transform3Model | | 可选。使用3Model机制。一个更加完备的转换系统，具体设计思想见下面的说明。当本属性被设置时优先级高于transform属性。单独设置transform属性可以视为本属性的一个简写。下面的章节有进一步的解释，源代码中有一些例子。        src/Transform3Model.ts |
+|  | toInputting | (object)=>string 从model转换到inputting model |
+|  | fromInputting | (string,object)=> object 从inputting model转换到model |
+|  | toView | (object)=> string 从model转换到view model |
+
+## “转换”
+
+“转换“（transform）在此是一个有一定特殊意义，跟表面意思有点区别的词，需要做一个进一步的说明。
+
+大纲编辑器有个比较普遍的功能，就是用普通的文本输入来快捷插入一些概念实体。比如，`#xxx` 表示打一个tag，`[[xxx]]` 表示关联一个topic，`((xxx))` 表示一个节点引用，`{{xxx}}`表示一个宏，等等。
+
+这个功能就要求大纲编辑的时候能从文本输入中识别出这些特定的概念实体。这个过程，就是在此使用的”转换“这个词。原意是指”把输入、编辑时的纯文本*转换*为展示时的丰富结构“。当然这个说法并不很理想，用的是一个技术手段概念来代替目的概念。可能更好的用词是”抽取“（Extracting）之类的。考虑在以后的版本中更新。
+
+转换/抽取机制是大纲编辑器的一个核心能力之一，是本项目演进过程中的一个焦点，其机制设计和实现变化比较频繁。
 
 ## 3Model机制
+
+从上面一个章节的介绍可以看到，转换机制最初只是”输入时的纯文本与展示时的丰富结构“的这两个表现形式的相互转换。后来发现这两个形式对于大纲编辑来说是不完整的。为了取得结构化的数据用于高层应用，不可能仿佛去读取和解析纯文本。纯文本只是一个节点处于输入/编辑时的适当形态，而不是一个好的，方便承载通常业务功能的标准形态。
+
+于是就有了3Model机制的设计。如下。
 
 树中的每个节点有三个模型，model、inputting model、view model，分别对应业务模型，编辑模型，展示模型。
 
