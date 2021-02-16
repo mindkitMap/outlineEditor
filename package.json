@@ -6,11 +6,11 @@
   "main": "dist/index.js",
   "dependencies": {
     "@types/classnames": "^2.2.11",
-    "@types/lodash": "^4.14.167",
+    "@types/lodash": "^4.14.168",
     "@types/moment": "^2.13.0",
     "@types/react-dnd": "^3.0.2",
     "@types/react-sortable-tree": "^0.3.12",
-    "@types/react-virtualized": "^9.21.10",
+    "@types/react-virtualized": "^9.21.11",
     "@types/uuid": "^8.3.0",
     "@webscopeio/react-textarea-autocomplete": "^4.7.3",
     "classnames": "^2.2.6",
@@ -29,12 +29,14 @@
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@jukben/emoji-search": "^2.0.1",
-    "@storybook/addon-actions": "^6.1.11",
-    "@storybook/addon-links": "^6.1.11",
-    "@storybook/addons": "^6.1.11",
-    "@storybook/react": "^6.1.11",
-    "@types/jest": "^26.0.19",
+    "@storybook/addon-actions": "^6.1.15",
+    "@storybook/addon-links": "^6.1.15",
+    "@storybook/addons": "^6.1.15",
+    "@storybook/react": "^6.1.15",
+    "@types/copyfiles": "^2.4.0",
+    "@types/jest": "^26.0.20",
     "babel-loader": "^8.2.2",
+    "copyfiles": "^2.4.1",
     "deep-object-diff": "^1.1.0",
     "final-form": "^4.20.1",
     "jest": "^26.6.3",
@@ -47,6 +49,7 @@
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc && copyfiles -u 1 ./src/*.css ./dist"
   }
 }

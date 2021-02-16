@@ -5,7 +5,7 @@ import { Form, Field, FormSpy } from "react-final-form";
 import { action } from "@storybook/addon-actions";
 import { data } from "./data";
 import { trigger } from "./trigger";
-import { tagTransform } from "./transform";
+import { tagTransform } from "./Transform";
 import {
   tagTransformer,
   refTransformer,

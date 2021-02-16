@@ -11,7 +11,7 @@ react 技术栈。
 
 ## 如何运行
 
-1. 运行StoryBook。`git clone` 、`npm install` 并 `npm storybook`。
+1. 运行StoryBook。`git clone` 、`npm install` 、`npm run build`、并 `npm run storybook`。
 
 2. 使用组件 - 
    ```jsx
