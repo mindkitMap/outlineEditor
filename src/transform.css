@@ -53,7 +53,8 @@
 } */
 
 .hidden {
-  width: 0px;
+  /* TODO 这个important是因为rta（自动完成组件）里面有个width：100%，看看如何更高地消除*/
+  width: 0px !important;
 }
 
 .shown {
