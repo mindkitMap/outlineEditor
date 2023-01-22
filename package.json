@@ -16,7 +16,7 @@
     "classnames": "^2.2.6",
     "lodash": "^4.17.20",
     "merge-options": "^3.0.4",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "react-dnd": "^11.1.3",
     "react-dom": "^16.14.0",
     "react-sortable-tree": "^2.8.0",
