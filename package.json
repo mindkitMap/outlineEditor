@@ -14,7 +14,7 @@
     "@types/uuid": "^8.3.0",
     "@webscopeio/react-textarea-autocomplete": "^4.7.3",
     "classnames": "^2.2.6",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "merge-options": "^3.0.4",
     "moment": "^2.29.1",
     "react-dnd": "^11.1.3",
